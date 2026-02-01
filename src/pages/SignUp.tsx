@@ -8,11 +8,11 @@ import { toast } from 'sonner';
 const SignUp = () => {
   const navigate = useNavigate();
   const { register, isLoading } = useAuth();
-  
+
   const [role, setRole] = useState<UserRole>('student');
   const [showPassword, setShowPassword] = useState(false);
   const [studentVerified, setStudentVerified] = useState(false);
-  
+
   // Form fields
   const [formData, setFormData] = useState({
     email: '',
@@ -21,6 +21,8 @@ const SignUp = () => {
     phone: '',
     batch: '',
     linkedin: '',
+    github: '',
+    mentorDomainPreference: '',
     adminCode: '',
     adminSecret: '',
   });
@@ -65,6 +67,9 @@ const SignUp = () => {
         password: formData.password,
         role: 'student' as UserRole,
         batch: formData.batch,
+        github: formData.github,
+        linkedIn: formData.linkedin,
+        mentorDomainPreference: formData.mentorDomainPreference,
       };
     } else if (role === 'alumni') {
       if (!formData.username || !formData.password) {
@@ -78,7 +83,8 @@ const SignUp = () => {
         role: 'alumni' as UserRole,
         batch: formData.batch,
         phone: formData.phone,
-        linkedin: formData.linkedin,
+        linkedIn: formData.linkedin,
+        github: formData.github,
       };
     } else {
       if (!formData.adminCode || !formData.adminSecret) {
@@ -96,8 +102,15 @@ const SignUp = () => {
     const result = await register(userData);
 
     if (result.success) {
-      toast.success('Account created successfully!');
-      navigate(role === 'admin' ? '/admin' : role === 'alumni' ? '/alumni' : '/student');
+      if (result.error) {
+        // Handle pending admin approval (for students and new admins)
+        toast.info(result.error, { duration: 6000 });
+        navigate('/signin');
+      } else {
+        toast.success('Account created successfully!');
+        // Redirect to appropriate dashboard only if successfully logged in (alumni)
+        navigate(role === 'alumni' ? '/alumni' : '/signin');
+      }
     } else {
       toast.error(result.error || 'Registration failed');
     }
@@ -106,7 +119,7 @@ const SignUp = () => {
   return (
     <div className="min-h-screen flex items-center justify-center py-12 px-4">
       <VantaBackground backgroundColor={0xf8fafc} />
-      
+
       <div className="w-full max-w-2xl">
         <div className="glass-solid rounded-[3rem] p-8 md:p-12">
           {/* Header */}
@@ -129,11 +142,10 @@ const SignUp = () => {
                   setRole(r.value);
                   setStudentVerified(false);
                 }}
-                className={`flex-1 py-3 text-nav rounded-xl transition-all duration-300 ${
-                  role === r.value
-                    ? 'bg-card shadow-lg text-primary'
-                    : 'text-muted-foreground hover:text-foreground'
-                }`}
+                className={`flex-1 py-3 text-nav rounded-xl transition-all duration-300 ${role === r.value
+                  ? 'bg-card shadow-lg text-primary'
+                  : 'text-muted-foreground hover:text-foreground'
+                  }`}
               >
                 {r.label}
               </button>
@@ -172,6 +184,23 @@ const SignUp = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
                         <label className="text-label text-muted-foreground mb-1 block">
+                          Mentorship Domain
+                        </label>
+                        <select
+                          value={formData.mentorDomainPreference}
+                          onChange={(e) => updateField('mentorDomainPreference', e.target.value)}
+                          className="input-solid"
+                        >
+                          <option value="">Preferred Domain</option>
+                          <option value="Artificial Intelligence">Artificial Intelligence</option>
+                          <option value="Web Development">Web Development</option>
+                          <option value="Data Science">Data Science</option>
+                          <option value="Cloud Computing">Cloud Computing</option>
+                          <option value="Cybersecurity">Cybersecurity</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="text-label text-muted-foreground mb-1 block">
                           Batch
                         </label>
                         <select
@@ -184,6 +213,33 @@ const SignUp = () => {
                             <option key={b} value={b}>{b}</option>
                           ))}
                         </select>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="relative">
+                        <label className="text-label text-muted-foreground mb-1 block">
+                          GitHub Profile
+                        </label>
+                        <input
+                          type="url"
+                          value={formData.github}
+                          onChange={(e) => updateField('github', e.target.value)}
+                          placeholder="https://github.com/profile"
+                          className="input-solid"
+                        />
+                      </div>
+                      <div className="relative">
+                        <label className="text-label text-muted-foreground mb-1 block">
+                          LinkedIn Profile
+                        </label>
+                        <input
+                          type="url"
+                          value={formData.linkedin}
+                          onChange={(e) => updateField('linkedin', e.target.value)}
+                          placeholder="https://linkedin.com/in/profile"
+                          className="input-solid"
+                        />
                       </div>
                     </div>
                     <div className="relative">
@@ -239,17 +295,28 @@ const SignUp = () => {
                     <option key={b} value={b}>{b}</option>
                   ))}
                 </select>
-                <div className="relative">
-                  <input
-                    type="url"
-                    value={formData.linkedin}
-                    onChange={(e) => updateField('linkedin', e.target.value)}
-                    placeholder="LinkedIn Profile"
-                    className="input-solid pr-12"
-                  />
-                  <span className="absolute right-4 top-4 text-primary">
-                    <Linkedin size={20} />
-                  </span>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="relative">
+                    <input
+                      type="url"
+                      value={formData.linkedin}
+                      onChange={(e) => updateField('linkedin', e.target.value)}
+                      placeholder="LinkedIn Profile"
+                      className="input-solid pr-12"
+                    />
+                    <span className="absolute right-4 top-4 text-primary">
+                      <Linkedin size={20} />
+                    </span>
+                  </div>
+                  <div className="relative">
+                    <input
+                      type="url"
+                      value={formData.github}
+                      onChange={(e) => updateField('github', e.target.value)}
+                      placeholder="GitHub Profile"
+                      className="input-solid"
+                    />
+                  </div>
                 </div>
                 <div className="relative">
                   <input

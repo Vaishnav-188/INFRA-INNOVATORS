@@ -16,6 +16,13 @@ const Navbar = () => {
     { path: '/', label: 'Home' },
     { path: '/events', label: 'Events' },
     { path: '/jobs', label: 'Jobs' },
+    ...(isAuthenticated && user?.role === 'student' ? [
+      { path: '/matching', label: 'Find Mentors' },
+      { path: '/connections', label: 'Connections' }
+    ] : []),
+    ...(isAuthenticated && user?.role === 'alumni' ? [
+      { path: '/connections', label: 'Connections' }
+    ] : []),
   ];
 
   const getDashboardLink = () => {
@@ -54,11 +61,10 @@ const Navbar = () => {
             <Link
               key={link.path}
               to={link.path}
-              className={`transition-colors duration-300 ${
-                isActive(link.path)
+              className={`transition-colors duration-300 ${isActive(link.path)
                   ? 'text-primary'
                   : 'hover:text-primary'
-              }`}
+                }`}
             >
               {link.label}
             </Link>
@@ -112,11 +118,10 @@ const Navbar = () => {
                 key={link.path}
                 to={link.path}
                 onClick={() => setIsMobileMenuOpen(false)}
-                className={`text-nav py-2 transition-colors duration-300 ${
-                  isActive(link.path)
+                className={`text-nav py-2 transition-colors duration-300 ${isActive(link.path)
                     ? 'text-primary'
                     : 'text-muted-foreground hover:text-primary'
-                }`}
+                  }`}
               >
                 {link.label}
               </Link>

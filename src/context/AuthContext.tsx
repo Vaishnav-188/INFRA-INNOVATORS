@@ -12,6 +12,8 @@ export interface User {
   batch?: string;
   phone?: string;
   linkedin?: string;
+  github?: string;
+  mentorDomainPreference?: string;
   isVerified?: boolean;
 }
 
@@ -83,27 +85,52 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     role: UserRole
   ): Promise<{ success: boolean; error?: string }> => {
     setIsLoading(true);
-    
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 800));
 
-    // Find user in demo users
-    const foundUser = DEMO_USERS.find(
-      u => u.email.toLowerCase() === email.toLowerCase() && 
-           u.password === password && 
-           u.role === role
-    );
+    try {
+      // Call backend API
+      const response = await fetch('http://localhost:5000/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          collegeEmail: email,
+          password: password,
+          role: role
+        }),
+      });
 
-    if (foundUser) {
-      const { password: _, ...userWithoutPassword } = foundUser;
-      setUser(userWithoutPassword);
-      localStorage.setItem('alumni_hub_user', JSON.stringify(userWithoutPassword));
+      const data = await response.json();
+
+      if (data.success && data.user) {
+        // Store token
+        localStorage.setItem('alumni_hub_token', data.token);
+
+        // Create user object
+        const user: User = {
+          id: data.user._id,
+          username: data.user.username || data.user.name,
+          email: data.user.collegeEmail,
+          role: data.user.role,
+          batch: data.user.batch,
+          phone: data.user.mobileNumber,
+          linkedin: data.user.linkedIn,
+          isVerified: true,
+        };
+
+        setUser(user);
+        localStorage.setItem('alumni_hub_user', JSON.stringify(user));
+        setIsLoading(false);
+        return { success: true };
+      } else {
+        setIsLoading(false);
+        return { success: false, error: data.message || 'Invalid credentials. Please check your email, password, and role.' };
+      }
+    } catch (error) {
+      console.error('Login error:', error);
       setIsLoading(false);
-      return { success: true };
+      return { success: false, error: 'Unable to connect to server. Please try again.' };
     }
-
-    setIsLoading(false);
-    return { success: false, error: 'Invalid credentials. Please check your email, password, and role.' };
   };
 
   // Register function
@@ -111,36 +138,65 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     userData: Partial<User> & { password: string }
   ): Promise<{ success: boolean; error?: string }> => {
     setIsLoading(true);
-    
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
 
-    // Check if email already exists
-    const existingUser = DEMO_USERS.find(
-      u => u.email.toLowerCase() === userData.email?.toLowerCase()
-    );
+    try {
+      // Call backend API
+      const response = await fetch('http://localhost:5000/api/auth/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: userData.username,
+          username: userData.username,
+          collegeEmail: userData.email,
+          password: userData.password,
+          role: userData.role,
+          batch: userData.batch,
+          mobileNumber: userData.phone,
+          linkedIn: (userData as any).linkedIn || userData.linkedin,
+          github: (userData as any).github,
+          mentorDomainPreference: (userData as any).mentorDomainPreference,
+        }),
+      });
 
-    if (existingUser) {
+      const data = await response.json();
+
+      if (data.success && data.user) {
+        // Only set user if we got a token (verified roles like alumni/admin)
+        if (data.token) {
+          localStorage.setItem('alumni_hub_token', data.token);
+
+          const newUser: User = {
+            id: data.user._id,
+            username: data.user.username || data.user.name,
+            email: data.user.collegeEmail,
+            role: data.user.role,
+            batch: data.user.batch,
+            phone: data.user.mobileNumber,
+            linkedin: data.user.linkedIn,
+            isVerified: true,
+          };
+
+          setUser(newUser);
+          localStorage.setItem('alumni_hub_user', JSON.stringify(newUser));
+        }
+
+        setIsLoading(false);
+        // Special case: return message for students needing approval
+        return {
+          success: true,
+          error: !data.token ? data.message : undefined
+        };
+      } else {
+        setIsLoading(false);
+        return { success: false, error: data.message || 'Registration failed.' };
+      }
+    } catch (error) {
+      console.error('Registration error:', error);
       setIsLoading(false);
-      return { success: false, error: 'An account with this email already exists.' };
+      return { success: false, error: 'Unable to connect to server. Please try again.' };
     }
-
-    // Create new user
-    const newUser: User = {
-      id: Date.now().toString(),
-      username: userData.username || '',
-      email: userData.email || '',
-      role: userData.role || 'student',
-      batch: userData.batch,
-      phone: userData.phone,
-      linkedin: userData.linkedin,
-      isVerified: userData.role === 'student',
-    };
-
-    setUser(newUser);
-    localStorage.setItem('alumni_hub_user', JSON.stringify(newUser));
-    setIsLoading(false);
-    return { success: true };
   };
 
   // Logout function
@@ -187,7 +243,7 @@ export const withAuth = <P extends object>(
 ) => {
   return (props: P) => {
     const { user, isAuthenticated } = useAuth();
-    
+
     if (!isAuthenticated) {
       return null; // Router will handle redirect
     }

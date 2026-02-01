@@ -8,7 +8,7 @@ import { toast } from 'sonner';
 const SignIn = () => {
   const navigate = useNavigate();
   const { login, isLoading } = useAuth();
-  
+
   const [role, setRole] = useState<UserRole>('student');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -36,14 +36,14 @@ const SignIn = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!email || !password) {
       toast.error('Please fill in all fields');
       return;
     }
 
     const result = await login(email, password, role);
-    
+
     if (result.success) {
       toast.success('Welcome back!');
       // Redirect based on role
@@ -68,7 +68,7 @@ const SignIn = () => {
   return (
     <div className="min-h-screen flex items-center justify-center py-12 px-4">
       <VantaBackground backgroundColor={0xf8fafc} />
-      
+
       <div className="w-full max-w-[500px]">
         <div className="glass-solid rounded-[3.5rem] p-10 md:p-14">
           {/* Header */}
@@ -88,11 +88,10 @@ const SignIn = () => {
               <button
                 key={r.value}
                 onClick={() => setRole(r.value)}
-                className={`flex-1 py-3 text-nav rounded-xl transition-all duration-300 ${
-                  role === r.value
+                className={`flex-1 py-3 text-nav rounded-xl transition-all duration-300 ${role === r.value
                     ? 'bg-card shadow-lg text-primary'
                     : 'text-muted-foreground hover:text-foreground'
-                }`}
+                  }`}
               >
                 {r.label}
               </button>
@@ -172,9 +171,9 @@ const SignIn = () => {
           <div className="mt-6 p-4 bg-muted rounded-2xl">
             <p className="text-xs text-muted-foreground font-bold mb-2">Demo Credentials:</p>
             <div className="text-xs text-muted-foreground space-y-1">
-              <p>• Admin: admin@college.edu / admin123</p>
-              <p>• Student: john@kgkite.ac.in / student123</p>
-              <p>• Alumni: sarah@alumni.com / alumni123</p>
+              <p>• Admin: admin@college.edu / Admin@123</p>
+              <p>• Student: student1@kgkite.ac.in / Student@123</p>
+              <p>• Alumni: alumni1@kgkite.ac.in / Alumni@123</p>
             </div>
           </div>
         </div>

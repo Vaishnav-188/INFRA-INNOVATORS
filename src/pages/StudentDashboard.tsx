@@ -1,36 +1,105 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import MainLayout from '@/components/layout/MainLayout';
 import GlassCard from '@/components/ui/GlassCard';
 import { useAuth } from '@/context/AuthContext';
 import { usePageTransition, useStaggerReveal } from '@/hooks/useGSAP';
 import { Calendar, Briefcase, GraduationCap, BookOpen, Users, ArrowRight } from 'lucide-react';
-
-// Demo data
-const upcomingEvents = [
-  { id: 1, title: 'Annual Alumni Meet 2026', date: 'Feb 15, 2026', type: 'Networking' },
-  { id: 2, title: 'Campus to Corporate Workshop', date: 'Mar 01, 2026', type: 'Workshop' },
-  { id: 3, title: 'Placement Drive', date: 'Feb 28, 2026', type: 'Career' },
-];
-
-const recentJobs = [
-  { id: 1, title: 'Software Engineer', company: 'OrbitGlobal', location: 'Bangalore' },
-  { id: 2, title: 'Data Science Intern', company: 'HealthTech', location: 'Remote' },
-  { id: 3, title: 'Full Stack Developer', company: 'TechStartup', location: 'Chennai' },
-];
+import { toast } from 'sonner';
 
 const StudentDashboard = () => {
-  const { user } = useAuth();
+  const { user, isLoading: authLoading } = useAuth();
   const navigate = useNavigate();
   const pageRef = usePageTransition();
   const cardsRef = useStaggerReveal(0.1);
 
+  // Dynamic state
+  const [upcomingEvents, setUpcomingEvents] = useState([]);
+  const [recentJobs, setRecentJobs] = useState([]);
+  const [alumniCount, setAlumniCount] = useState(0);
+  const [connectionsCount, setConnectionsCount] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Fetch dashboard data
+  useEffect(() => {
+    if (user) {
+      fetchDashboardData();
+    }
+  }, [user]);
+
+  const fetchDashboardData = async () => {
+    const token = localStorage.getItem('alumni_hub_token');
+
+    try {
+      setIsLoading(true);
+
+      // Fetch events
+      const eventsResponse = await fetch('http://localhost:5000/api/events', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const eventsData = await eventsResponse.json();
+      if (eventsData.success) {
+        // Filter upcoming events and sort by date
+        const now = new Date().getTime();
+        const upcoming = eventsData.events
+          .filter(event => new Date(event.date).getTime() >= now)
+          .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+          .slice(0, 3);
+        setUpcomingEvents(upcoming);
+      }
+
+      // Fetch jobs
+      const jobsResponse = await fetch('http://localhost:5000/api/jobs', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const jobsData = await jobsResponse.json();
+      if (jobsData.success) {
+        setRecentJobs(jobsData.jobs.slice(0, 3));
+      }
+
+      // Fetch alumni count
+      const alumniResponse = await fetch('http://localhost:5000/api/connections/match', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const alumniData = await alumniResponse.json();
+      if (alumniData.success) {
+        setAlumniCount(alumniData.count || alumniData.alumni?.length || 0);
+      }
+
+      // Fetch connections/mentorship count
+      const connectionsResponse = await fetch('http://localhost:5000/api/connections', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const connectionsData = await connectionsResponse.json();
+      if (connectionsData.success) {
+        setConnectionsCount(connectionsData.connections?.length || 0);
+      }
+
+    } catch (error) {
+      console.error('Error fetching dashboard data:', error);
+      toast.error('Failed to load dashboard data');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   // Redirect if not student
   useEffect(() => {
-    if (!user || user.role !== 'student') {
+    if (!authLoading && (!user || user.role !== 'student')) {
       navigate('/signin');
     }
-  }, [user, navigate]);
+  }, [user, navigate, authLoading]);
+
+  if (authLoading || isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+          <p className="text-sm font-bold text-muted-foreground uppercase tracking-widest">Loading Dashboard...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (!user || user.role !== 'student') {
     return null;
@@ -63,12 +132,12 @@ const StudentDashboard = () => {
           </GlassCard>
           <GlassCard variant="light" className="p-6 text-center hover-lift">
             <Users className="w-10 h-10 mx-auto text-warning mb-3" />
-            <p className="text-2xl font-black text-foreground">250+</p>
+            <p className="text-2xl font-black text-foreground">{alumniCount}</p>
             <p className="text-xs font-bold text-muted-foreground uppercase">Alumni Network</p>
           </GlassCard>
           <GlassCard variant="light" className="p-6 text-center hover-lift">
             <BookOpen className="w-10 h-10 mx-auto text-destructive mb-3" />
-            <p className="text-2xl font-black text-foreground">15</p>
+            <p className="text-2xl font-black text-foreground">{connectionsCount}</p>
             <p className="text-xs font-bold text-muted-foreground uppercase">Mentorship Sessions</p>
           </GlassCard>
         </div>
@@ -83,23 +152,29 @@ const StudentDashboard = () => {
               </Link>
             </div>
             <div className="space-y-4">
-              {upcomingEvents.map((event) => (
-                <div
-                  key={event.id}
-                  className="flex items-center gap-4 p-4 bg-muted rounded-2xl hover:bg-muted/80 transition cursor-pointer"
-                >
-                  <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
-                    <Calendar className="text-primary" size={20} />
+              {upcomingEvents.length === 0 ? (
+                <p className="text-muted-foreground text-sm text-center py-8">No upcoming events</p>
+              ) : (
+                upcomingEvents.map((event) => (
+                  <div
+                    key={event._id}
+                    className="flex items-center gap-4 p-4 bg-muted rounded-2xl hover:bg-muted/80 transition cursor-pointer"
+                  >
+                    <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
+                      <Calendar className="text-primary" size={20} />
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="font-bold text-foreground">{event.title}</h3>
+                      <p className="text-xs text-muted-foreground">
+                        {new Date(event.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                      </p>
+                    </div>
+                    <span className="text-[10px] font-bold bg-primary/10 text-primary px-3 py-1 rounded-full uppercase">
+                      {event.eventType || 'Event'}
+                    </span>
                   </div>
-                  <div className="flex-1">
-                    <h3 className="font-bold text-foreground">{event.title}</h3>
-                    <p className="text-xs text-muted-foreground">{event.date}</p>
-                  </div>
-                  <span className="text-[10px] font-bold bg-primary/10 text-primary px-3 py-1 rounded-full uppercase">
-                    {event.type}
-                  </span>
-                </div>
-              ))}
+                ))
+              )}
             </div>
           </GlassCard>
 
@@ -112,23 +187,29 @@ const StudentDashboard = () => {
               </Link>
             </div>
             <div className="space-y-4">
-              {recentJobs.map((job) => (
-                <div
-                  key={job.id}
-                  className="flex items-center gap-4 p-4 bg-muted rounded-2xl hover:bg-muted/80 transition cursor-pointer"
-                >
-                  <div className="w-12 h-12 rounded-xl bg-success/10 flex items-center justify-center">
-                    <Briefcase className="text-success" size={20} />
+              {recentJobs.length === 0 ? (
+                <p className="text-muted-foreground text-sm text-center py-8">No job openings</p>
+              ) : (
+                recentJobs.map((job) => (
+                  <div
+                    key={job._id}
+                    className="flex items-center gap-4 p-4 bg-muted rounded-2xl hover:bg-muted/80 transition cursor-pointer"
+                  >
+                    <div className="w-12 h-12 rounded-xl bg-success/10 flex items-center justify-center">
+                      <Briefcase className="text-success" size={20} />
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="font-bold text-foreground">{job.title}</h3>
+                      <p className="text-xs text-muted-foreground">{job.company} • {job.location}</p>
+                    </div>
+                    <Link to="/jobs">
+                      <button className="text-[10px] font-bold bg-success text-success-foreground px-4 py-2 rounded-xl hover:bg-success/90 transition uppercase">
+                        Apply
+                      </button>
+                    </Link>
                   </div>
-                  <div className="flex-1">
-                    <h3 className="font-bold text-foreground">{job.title}</h3>
-                    <p className="text-xs text-muted-foreground">{job.company} • {job.location}</p>
-                  </div>
-                  <button className="text-[10px] font-bold bg-success text-success-foreground px-4 py-2 rounded-xl hover:bg-success/90 transition uppercase">
-                    Apply
-                  </button>
-                </div>
-              ))}
+                ))
+              )}
             </div>
           </GlassCard>
         </div>
@@ -140,7 +221,7 @@ const StudentDashboard = () => {
             Ready to Become an Alumni?
           </h2>
           <p className="text-muted-foreground mb-6 max-w-lg mx-auto">
-            After graduation, submit your verification request to transition to alumni status 
+            After graduation, submit your verification request to transition to alumni status
             and unlock exclusive features like posting jobs, mentoring students, and more.
           </p>
           <Link to="/">

@@ -119,6 +119,26 @@
   body {
     @apply bg-background text-foreground antialiased;
     font-feature-settings: "rlig" 1, "calt" 1;
+    /* Mobile touch optimization */
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+    overscroll-behavior: none;
+    /* Smooth scrolling for mobile */
+    scroll-behavior: smooth;
+    /* Support for safe areas (notches on modern phones) */
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
+  
+  /* Mobile-first responsive text sizing */
+  html {
+    font-size: 14px;
+  }
+  
+  @media (min-width: 640px) {
+    html {
+      font-size: 16px;
+    }
   }
 }
 
@@ -257,6 +277,74 @@
 
   ::-webkit-scrollbar-thumb:hover {
     background: hsl(var(--muted-foreground) / 0.5);
+  }
+  
+  /* Mobile-specific utilities */
+  .touch-pan-y {
+    touch-action: pan-y;
+  }
+  
+  .touch-pan-x {
+    touch-action: pan-x;
+  }
+  
+  /* Mobile-friendly container */
+  .container-mobile {
+    @apply w-full px-4 mx-auto;
+    max-width: 100%;
+  }
+  
+  @media (min-width: 640px) {
+    .container-mobile {
+      @apply px-6;
+      max-width: 640px;
+    }
+  }
+  
+  @media (min-width: 768px) {
+    .container-mobile {
+      @apply px-8;
+      max-width: 768px;
+    }
+  }
+  
+  @media (min-width: 1024px) {
+    .container-mobile {
+      max-width: 1024px;
+    }
+  }
+  
+  /* Responsive typography for mobile */
+  .text-responsive-lg {
+    @apply text-xl;
+  }
+  
+  @media (min-width: 768px) {
+    .text-responsive-lg {
+      @apply text-2xl;
+    }
+  }
+  
+  @media (min-width: 1024px) {
+    .text-responsive-lg {
+      @apply text-3xl;
+    }
+  }
+  
+  /* Touch-friendly hit areas */
+  .touch-target {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* Hide elements on mobile */
+  .mobile-hidden {
+    @apply hidden sm:block;
+  }
+  
+  /* Show only on mobile */
+  .mobile-only {
+    @apply block sm:hidden;
   }
 }
 

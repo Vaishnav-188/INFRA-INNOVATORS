@@ -14,6 +14,8 @@ import Jobs from "./pages/Jobs";
 import AdminDashboard from "./pages/AdminDashboard";
 import StudentDashboard from "./pages/StudentDashboard";
 import AlumniDashboard from "./pages/AlumniDashboard";
+import AlumniMatching from "./pages/AlumniMatching";
+import Connections from "./pages/Connections";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -32,12 +34,14 @@ const App = () => (
             <Route path="/signup" element={<SignUp />} />
             <Route path="/events" element={<Events />} />
             <Route path="/jobs" element={<Jobs />} />
-            
+
             {/* Protected Routes */}
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/student" element={<StudentDashboard />} />
             <Route path="/alumni" element={<AlumniDashboard />} />
-            
+            <Route path="/matching" element={<AlumniMatching />} />
+            <Route path="/connections" element={<Connections />} />
+
             {/* Catch-all */}
             <Route path="*" element={<NotFound />} />
           </Routes>

@@ -1,0 +1,6 @@
+name,username,collegeEmail,password,mobileNumber,rollNumber,registerNumber,department,yearOfStudy,batch,githubRepo,projectDomains,interests
+Rahul Kumar,rahul01,rahul.kumar@kgkite.ac.in,Student@123,9876543210,2022001,REG2026001,Computer Science,3,2022-2026,https://github.com/rahul01,"AI/ML,Web Development","React,Python,Machine Learning"
+Priya Sharma,priya02,priya.sharma@kgkite.ac.in,Student@123,9876543211,2022002,REG2026002,Information Technology,3,2022-2026,https://github.com/priya02,"Web Development","JavaScript,Node.js,MongoDB"
+Amit Patel,amit03,amit.patel@kgkite.ac.in,Student@123,9876543212,2023001,REG2026003,Electronics,2,2023-2027,https://github.com/amit03,"IoT,Embedded Systems","C++,Python,Arduino"
+Sneha Reddy,sneha04,sneha.reddy@kgkite.ac.in,Student@123,9876543213,2024001,REG2026004,Computer Science,1,2024-2028,https://github.com/sneha04,"AI/ML","Python,TensorFlow,Data Science"
+Vikram Singh,vikram05,vikram.singh@kgkite.ac.in,Student@123,9876543214,2021001,REG2026005,Mechanical,4,2021-2025,https://github.com/vikram05,"Robotics,CAD Design","SolidWorks,MATLAB"
