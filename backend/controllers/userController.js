@@ -31,7 +31,6 @@ export const getUserStats = async (req, res) => {
             User.countDocuments({ role: 'admin' }),
             User.countDocuments({ role: 'alumni', isPlaced: true }),
             User.countDocuments({
-                role: { $in: ['student', 'admin'] },
                 $or: [
                     { isVerified: false },
                     { isVerified: { $exists: false } }
@@ -112,12 +111,11 @@ export const getUserById = async (req, res) => {
 export const getPendingVerifications = async (req, res) => {
     try {
         const pending = await User.find({
-            role: { $in: ['student', 'admin'] },
             $or: [
                 { isVerified: false },
                 { isVerified: { $exists: false } }
             ]
-        }).select('name rollNumber yearOfStudy linkedIn collegeEmail github role');
+        }).select('name rollNumber yearOfStudy linkedIn collegeEmail github role batch');
 
         console.log(`[DEBUG] Found ${pending.length} pending verifications`);
         if (pending.length > 0) {
@@ -173,5 +171,64 @@ export const rejectUser = async (req, res) => {
     } catch (error) {
         console.error('Error rejecting user:', error);
         res.status(500).json({ error: 'Server error' });
+    }
+};
+
+// Request to become alumni (for students)
+export const requestAlumniStatus = async (req, res) => {
+    try {
+        const user = await User.findById(req.user._id);
+
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        if (user.role !== 'student') {
+            return res.status(400).json({ error: 'Only students can request alumni status' });
+        }
+
+        // We change role and set verified to false so admin can approve the role change
+        user.role = 'alumni';
+        user.isVerified = false;
+
+        // Update batch if provided in request
+        if (req.body.batch) {
+            user.batch = req.body.batch;
+        }
+
+        await user.save();
+
+        res.json({
+            success: true,
+            message: 'Alumni verification request submitted. Please wait for admin approval.'
+        });
+    } catch (error) {
+        console.error('Error requesting alumni status:', error);
+        res.status(500).json({ error: 'Server error' });
+    }
+};
+// Bulk delete users by role
+export const deleteUsersByRole = async (req, res) => {
+    try {
+        const { role } = req.params;
+
+        if (!['student', 'alumni'].includes(role)) {
+            return res.status(400).json({
+                success: false,
+                message: 'Invalid role for bulk deletion'
+            });
+        }
+
+        // We delete all users with this role
+        const result = await User.deleteMany({ role });
+
+        res.json({
+            success: true,
+            message: `Successfully deleted ${result.deletedCount} ${role} accounts`,
+            deletedCount: result.deletedCount
+        });
+    } catch (error) {
+        console.error('Error in bulk delete:', error);
+        res.status(500).json({ error: 'Server error during bulk deletion' });
     }
 };

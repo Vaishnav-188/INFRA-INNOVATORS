@@ -134,10 +134,7 @@ const userSchema = new mongoose.Schema({
   },
   isVerified: {
     type: Boolean,
-    default: function () {
-      // Students and Admins must be verified by an admin
-      return this.role === 'alumni';
-    }
+    default: false
   },
 
   createdAt: {

@@ -11,13 +11,12 @@ interface MainLayoutProps {
 }
 
 const MainLayout = ({ children, showNavbar = true, showChatbot = true }: MainLayoutProps) => {
-  const pageRef = usePageTransition();
 
   return (
     <div className="min-h-screen relative">
       <VantaBackground />
       {showNavbar && <Navbar />}
-      <main ref={pageRef} className="relative z-10">
+      <main className="relative">
         {children}
       </main>
       {showChatbot && <Chatbot />}

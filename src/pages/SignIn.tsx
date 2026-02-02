@@ -26,7 +26,7 @@ const SignIn = () => {
       case 'student':
         return 'roll_no@kgkite.ac.in';
       case 'alumni':
-        return 'Alumni Email';
+        return 'name@kgkite.alumni.ac.in';
       case 'admin':
         return 'Admin Email (admin@college.edu)';
       default:
@@ -89,8 +89,8 @@ const SignIn = () => {
                 key={r.value}
                 onClick={() => setRole(r.value)}
                 className={`flex-1 py-3 text-nav rounded-xl transition-all duration-300 ${role === r.value
-                    ? 'bg-card shadow-lg text-primary'
-                    : 'text-muted-foreground hover:text-foreground'
+                  ? 'bg-card shadow-lg text-primary'
+                  : 'text-muted-foreground hover:text-foreground'
                   }`}
               >
                 {r.label}

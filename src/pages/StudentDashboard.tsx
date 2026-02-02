@@ -4,7 +4,7 @@ import MainLayout from '@/components/layout/MainLayout';
 import GlassCard from '@/components/ui/GlassCard';
 import { useAuth } from '@/context/AuthContext';
 import { usePageTransition, useStaggerReveal } from '@/hooks/useGSAP';
-import { Calendar, Briefcase, GraduationCap, BookOpen, Users, ArrowRight } from 'lucide-react';
+import { Calendar, Briefcase, GraduationCap, BookOpen, Users, ArrowRight, Send, X } from 'lucide-react';
 import { toast } from 'sonner';
 
 const StudentDashboard = () => {
@@ -12,6 +12,12 @@ const StudentDashboard = () => {
   const navigate = useNavigate();
   const pageRef = usePageTransition();
   const cardsRef = useStaggerReveal(0.1);
+
+  // Mentorship modal state
+  const [showMentorshipModal, setShowMentorshipModal] = useState(false);
+  const [mentorshipDomain, setMentorshipDomain] = useState('');
+  const [mentorshipMessage, setMentorshipMessage] = useState('');
+  const [careerGoals, setCareerGoals] = useState('');
 
   // Dynamic state
   const [upcomingEvents, setUpcomingEvents] = useState([]);
@@ -34,7 +40,7 @@ const StudentDashboard = () => {
       setIsLoading(true);
 
       // Fetch events
-      const eventsResponse = await fetch('http://localhost:5000/api/events', {
+      const eventsResponse = await fetch('/api/events', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const eventsData = await eventsResponse.json();
@@ -49,7 +55,7 @@ const StudentDashboard = () => {
       }
 
       // Fetch jobs
-      const jobsResponse = await fetch('http://localhost:5000/api/jobs', {
+      const jobsResponse = await fetch('/api/jobs', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const jobsData = await jobsResponse.json();
@@ -58,7 +64,7 @@ const StudentDashboard = () => {
       }
 
       // Fetch alumni count
-      const alumniResponse = await fetch('http://localhost:5000/api/connections/match', {
+      const alumniResponse = await fetch('/api/connections/match', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const alumniData = await alumniResponse.json();
@@ -67,7 +73,7 @@ const StudentDashboard = () => {
       }
 
       // Fetch connections/mentorship count
-      const connectionsResponse = await fetch('http://localhost:5000/api/connections', {
+      const connectionsResponse = await fetch('/api/connections', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const connectionsData = await connectionsResponse.json();
@@ -80,6 +86,39 @@ const StudentDashboard = () => {
       toast.error('Failed to load dashboard data');
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleAlumniRequest = async () => {
+    const token = localStorage.getItem('alumni_hub_token');
+    if (!token) return;
+
+    const toastId = toast.loading('Submitting alumni verification request...');
+
+    try {
+      const response = await fetch('/api/users/request-alumni', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ batch: user?.batch })
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        toast.success(data.message, { id: toastId });
+        // Optionally logout or redirect to signin since role changed and they are now unverified
+        setTimeout(() => {
+          navigate('/signin');
+        }, 3000);
+      } else {
+        toast.error(data.error || 'Request failed', { id: toastId });
+      }
+    } catch (error) {
+      console.error('Error requesting alumni status:', error);
+      toast.error('Connection error', { id: toastId });
     }
   };
 
@@ -107,7 +146,7 @@ const StudentDashboard = () => {
 
   return (
     <MainLayout>
-      <div ref={pageRef} className="pt-24 px-6 md:px-20 max-w-7xl mx-auto pb-20">
+      <div ref={pageRef} className="pt-40 px-6 md:px-20 max-w-7xl mx-auto pb-20">
         {/* Welcome Header */}
         <div className="mb-10">
           <h1 className="text-4xl font-black text-foreground tracking-tight">
@@ -135,11 +174,13 @@ const StudentDashboard = () => {
             <p className="text-2xl font-black text-foreground">{alumniCount}</p>
             <p className="text-xs font-bold text-muted-foreground uppercase">Alumni Network</p>
           </GlassCard>
-          <GlassCard variant="light" className="p-6 text-center hover-lift">
-            <BookOpen className="w-10 h-10 mx-auto text-destructive mb-3" />
-            <p className="text-2xl font-black text-foreground">{connectionsCount}</p>
-            <p className="text-xs font-bold text-muted-foreground uppercase">Mentorship Sessions</p>
-          </GlassCard>
+          <Link to="/student/mentorship">
+            <GlassCard variant="light" className="p-6 text-center hover-lift cursor-pointer group">
+              <BookOpen className="w-10 h-10 mx-auto text-destructive mb-3 group-hover:scale-110 transition-transform" />
+              <p className="text-2xl font-black text-foreground">{connectionsCount}</p>
+              <p className="text-xs font-bold text-muted-foreground uppercase">My Mentorships</p>
+            </GlassCard>
+          </Link>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -224,11 +265,12 @@ const StudentDashboard = () => {
             After graduation, submit your verification request to transition to alumni status
             and unlock exclusive features like posting jobs, mentoring students, and more.
           </p>
-          <Link to="/">
-            <button className="px-8 py-4 btn-primary">
-              Submit Verification Request
-            </button>
-          </Link>
+          <button
+            onClick={handleAlumniRequest}
+            className="px-8 py-4 btn-primary"
+          >
+            Submit Verification Request
+          </button>
         </GlassCard>
       </div>
     </MainLayout>

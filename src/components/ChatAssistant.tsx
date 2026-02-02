@@ -32,7 +32,7 @@ const ChatAssistant = () => {
     const loadChatHistory = async () => {
         try {
             const token = localStorage.getItem('token');
-            const response = await fetch('http://localhost:5000/api/chat/history?limit=20', {
+            const response = await fetch('/api/chat/history?limit=20', {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
@@ -75,7 +75,7 @@ const ChatAssistant = () => {
 
         try {
             const token = localStorage.getItem('token');
-            const response = await fetch('http://localhost:5000/api/chat/message', {
+            const response = await fetch('/api/chat/message', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -108,7 +108,7 @@ const ChatAssistant = () => {
     const clearHistory = async () => {
         try {
             const token = localStorage.getItem('token');
-            await fetch('http://localhost:5000/api/chat/history', {
+            await fetch('/api/chat/history', {
                 method: 'DELETE',
                 headers: {
                     'Authorization': `Bearer ${token}`

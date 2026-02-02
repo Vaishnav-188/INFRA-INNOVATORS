@@ -6,7 +6,8 @@ import {
     createEvent,
     updateEvent,
     deleteEvent,
-    updateEventStatus
+    updateEventStatus,
+    getPendingEvents
 } from '../controllers/eventController.js';
 
 const router = express.Router();
@@ -16,6 +17,7 @@ router.get('/', getAllEvents);
 
 // Protected routes
 router.get('/my', protect, getMyEvents);
+router.get('/pending', protect, authorize('admin'), getPendingEvents);
 router.post('/', protect, authorize('alumni', 'admin'), createEvent);
 router.patch('/:id', protect, authorize('alumni', 'admin'), updateEvent);
 router.delete('/:id', protect, authorize('alumni', 'admin'), deleteEvent);

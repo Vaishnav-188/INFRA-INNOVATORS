@@ -1,9 +1,9 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import MainLayout from '@/components/layout/MainLayout';
 import GlassCard from '@/components/ui/GlassCard';
 import { useHeroReveal, useScrollReveal, useStaggerReveal } from '@/hooks/useGSAP';
 import { useAuth } from '@/context/AuthContext';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 
 // Success stories data
@@ -36,12 +36,50 @@ const galleryImages = [
 
 const Index = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const heroRef = useHeroReveal();
   const storiesRef = useScrollReveal();
   const galleryRef = useStaggerReveal(0.1);
   const verificationRef = useScrollReveal();
   const donationRef = useScrollReveal();
   const feedbackRef = useScrollReveal();
+
+  // Dynamic content
+  const [stories, setStories] = useState(successStories);
+  const [gallery, setGallery] = useState(galleryImages);
+  const [heroContent, setHeroContent] = useState({
+    line1: 'EXCELLENCE',
+    line2: 'RECONNECTED.',
+    subtitle: 'The official professional gateway for our alumni community. Share stories, discover opportunities, and mentor the next generation.'
+  });
+
+  const fetchHomeSettings = async () => {
+    try {
+      const response = await fetch('/api/system/settings');
+      const data = await response.json();
+      if (data.success && data.settings.homepageSettings) {
+        if (data.settings.homepageSettings.successStories?.length > 0) {
+          setStories(data.settings.homepageSettings.successStories);
+        }
+        if (data.settings.homepageSettings.galleryImages?.length > 0) {
+          setGallery(data.settings.homepageSettings.galleryImages);
+        }
+        if (data.settings.homepageSettings.hero) {
+          setHeroContent({
+            line1: data.settings.homepageSettings.hero.line1 || 'EXCELLENCE',
+            line2: data.settings.homepageSettings.hero.line2 || 'RECONNECTED.',
+            subtitle: data.settings.homepageSettings.hero.subtitle || heroContent.subtitle
+          });
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching home settings:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchHomeSettings();
+  }, []);
 
   // Verification form state
   const [verifyForm, setVerifyForm] = useState({
@@ -61,13 +99,41 @@ const Index = () => {
   // Feedback state
   const [feedback, setFeedback] = useState('');
 
-  const handleVerifySubmit = () => {
+  const handleVerifySubmit = async () => {
     if (!verifyForm.name || !verifyForm.roll) {
       toast.error('Please fill in all required fields');
       return;
     }
-    toast.success('Verification request submitted! Admin will review your application.');
-    setVerifyForm({ name: '', roll: '', study: '', dob: '', linkedin: '' });
+
+    const token = localStorage.getItem('alumni_hub_token');
+    const tid = toast.loading('Submitting verification request...');
+
+    try {
+      const response = await fetch('/api/users/request-alumni', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          batch: verifyForm.study,
+          // name and roll are already in the user profile, 
+          // but we follow same logic as StudentDashboard
+        })
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        toast.success(data.message, { id: tid });
+        setVerifyForm({ name: '', roll: '', study: '', dob: '', linkedin: '' });
+        // Redirect after success
+        setTimeout(() => navigate('/signin'), 2000);
+      } else {
+        toast.error(data.error || 'Request failed', { id: tid });
+      }
+    } catch (err) {
+      toast.error('Connection error', { id: tid });
+    }
   };
 
   const handleDonation = () => {
@@ -93,12 +159,11 @@ const Index = () => {
       {/* Hero Section */}
       <header ref={heroRef} className="pt-48 pb-32 px-10 text-center max-w-5xl mx-auto">
         <h1 className="text-hero text-foreground mb-8">
-          <span className="hero-line block">EXCELLENCE</span>
-          <span className="hero-line block text-primary italic">RECONNECTED.</span>
+          <span className="hero-line block">{heroContent.line1}</span>
+          <span className="hero-line block text-primary italic">{heroContent.line2}</span>
         </h1>
         <p className="hero-subtitle text-muted-foreground text-lg max-w-2xl mx-auto font-medium leading-relaxed">
-          The official professional gateway for our alumni community. Share stories, 
-          discover opportunities, and mentor the next generation.
+          {heroContent.subtitle}
         </p>
       </header>
 
@@ -108,8 +173,8 @@ const Index = () => {
         <section ref={storiesRef} className="mb-24">
           <h2 className="text-label text-primary mb-10 text-center">Success Stories</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {successStories.map((story) => (
-              <GlassCard key={story.id} variant="light" hover>
+            {stories.map((story, idx) => (
+              <GlassCard key={idx} variant="light" hover>
                 <div className="flex items-center gap-5 mb-6">
                   <div className="w-16 h-16 bg-muted rounded-2xl overflow-hidden">
                     <img
@@ -143,7 +208,7 @@ const Index = () => {
             </button>
           </div>
           <div ref={galleryRef} className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            {galleryImages.map((img, idx) => (
+            {gallery.map((img, idx) => (
               <div
                 key={idx}
                 className="aspect-square glass-light rounded-3xl overflow-hidden group"
@@ -258,7 +323,7 @@ const Index = () => {
                 Feedback
               </h2>
               <p className="text-muted-foreground font-medium">
-                Your insights help the management team improve campus life and institutional operations. 
+                Your insights help the management team improve campus life and institutional operations.
                 All feedback is reviewed by the Board of Directors.
               </p>
             </div>

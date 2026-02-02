@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useNavbarScroll } from '@/hooks/useGSAP';
@@ -7,6 +7,7 @@ import { useNavbarScroll } from '@/hooks/useGSAP';
 const Navbar = () => {
   const { user, isAuthenticated, logout } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
   const navRef = useNavbarScroll();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -39,6 +40,11 @@ const Navbar = () => {
     }
   };
 
+  const handleLogout = () => {
+    logout();
+    navigate('/');
+  };
+
   const dashboardLink = getDashboardLink();
 
   return (
@@ -62,8 +68,8 @@ const Navbar = () => {
               key={link.path}
               to={link.path}
               className={`transition-colors duration-300 ${isActive(link.path)
-                  ? 'text-primary'
-                  : 'hover:text-primary'
+                ? 'text-primary'
+                : 'hover:text-primary'
                 }`}
             >
               {link.label}
@@ -91,7 +97,7 @@ const Navbar = () => {
                 </Link>
               )}
               <button
-                onClick={logout}
+                onClick={handleLogout}
                 className="text-nav text-muted-foreground hover:text-destructive transition-colors duration-300"
               >
                 Logout
@@ -119,8 +125,8 @@ const Navbar = () => {
                 to={link.path}
                 onClick={() => setIsMobileMenuOpen(false)}
                 className={`text-nav py-2 transition-colors duration-300 ${isActive(link.path)
-                    ? 'text-primary'
-                    : 'text-muted-foreground hover:text-primary'
+                  ? 'text-primary'
+                  : 'text-muted-foreground hover:text-primary'
                   }`}
               >
                 {link.label}
@@ -148,7 +154,7 @@ const Navbar = () => {
                   )}
                   <button
                     onClick={() => {
-                      logout();
+                      handleLogout();
                       setIsMobileMenuOpen(false);
                     }}
                     className="text-nav text-muted-foreground hover:text-destructive transition-colors duration-300 py-2"

@@ -5,7 +5,7 @@ import Event from '../models/Event.js';
 // @access  Public
 export const getAllEvents = async (req, res) => {
     try {
-        const events = await Event.find()
+        const events = await Event.find({ status: { $ne: 'pending' } })
             .populate('organizer', 'name email')
             .sort({ date: 1 });
 
@@ -53,7 +53,8 @@ export const createEvent = async (req, res) => {
             venue,
             isVirtual: isVirtual === 'true' || isVirtual === true,
             meetingLink,
-            organizer: req.user._id
+            organizer: req.user._id,
+            status: req.user.role === 'admin' ? 'upcoming' : 'pending'
         });
 
         res.status(201).json({
@@ -147,6 +148,24 @@ export const deleteEvent = async (req, res) => {
         });
     } catch (error) {
         console.error('Error deleting event:', error);
+        res.status(500).json({ success: false, message: 'Server error' });
+    }
+};
+// @desc    Get all pending events (for admin)
+// @route   GET /api/events/pending
+// @access  Private (Admin only)
+export const getPendingEvents = async (req, res) => {
+    try {
+        const events = await Event.find({ status: 'pending' })
+            .populate('organizer', 'name email rollNumber yearOfStudy branch')
+            .sort({ createdAt: -1 });
+
+        res.json({
+            success: true,
+            events
+        });
+    } catch (error) {
+        console.error('Error fetching pending events:', error);
         res.status(500).json({ success: false, message: 'Server error' });
     }
 };

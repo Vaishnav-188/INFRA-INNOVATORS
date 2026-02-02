@@ -1,6 +1,6 @@
 name,username,collegeEmail,password,mobileNumber,rollNumber,registerNumber,department,yearOfStudy,batch,githubRepo,projectDomains,interests
 Aarav Kumar,aarav01,aarav.kumar@kgkite.ac.in,Student@123,9876543210,2022001,REG2022001,Computer Science,3,2022-2026,https://github.com/aaravkumar,"AI/ML,Web Development","Python,React,Machine Learning"
-Diya Sharma,diya02,diya.sharma@kgkite.ac.in,Student@123,9876543211,2022002,REG2022002,Computer Science,3,2022-2026,https://github.com/diyasharma,"Web Development,Mobile Apps","JavaScript,Flutter,Node.js"
+Diya Sharma,diya02,gkite.ac.indiya.sharma@k,Student@123,9876543211,2022002,REG2022002,Computer Science,3,2022-2026,https://github.com/diyasharma,"Web Development,Mobile Apps","JavaScript,Flutter,Node.js"
 Arjun Patel,arjun03,arjun.patel@kgkite.ac.in,Student@123,9876543212,2022003,REG2022003,Information Technology,3,2022-2026,https://github.com/arjunpatel,"Cloud Computing,DevOps","AWS,Docker,Python"
 Ananya Singh,ananya04,ananya.singh@kgkite.ac.in,Student@123,9876543213,2022004,REG2022004,Computer Science,3,2022-2026,https://github.com/ananyasingh,"Data Science,AI/ML","Python,TensorFlow,Pandas"
 Rohan Reddy,rohan05,rohan.reddy@kgkite.ac.in,Student@123,9876543214,2022005,REG2022005,Information Technology,3,2022-2026,https://github.com/rohanreddy,"Full Stack,Web Development","React,Node.js,MongoDB"

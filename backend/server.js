@@ -16,6 +16,7 @@ import userRoutes from './routes/userRoutes.js';
 import systemRoutes from './routes/systemRoutes.js';
 import donationRoutes from './routes/donationRoutes.js';
 import eventRoutes from './routes/eventRoutes.js';
+import mentorshipRoutes from './routes/mentorshipRoutes.js';
 
 // Load environment variables
 dotenv.config();
@@ -59,6 +60,7 @@ app.use('/api/users', userRoutes);
 app.use('/api/system', systemRoutes);
 app.use('/api/donations', donationRoutes);
 app.use('/api/events', eventRoutes);
+app.use('/api/mentorship', mentorshipRoutes);
 
 // Health check route
 app.get('/health', (req, res) => {

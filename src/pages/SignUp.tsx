@@ -12,6 +12,7 @@ const SignUp = () => {
   const [role, setRole] = useState<UserRole>('student');
   const [showPassword, setShowPassword] = useState(false);
   const [studentVerified, setStudentVerified] = useState(false);
+  const [alumniVerified, setAlumniVerified] = useState(false);
 
   // Form fields
   const [formData, setFormData] = useState({
@@ -43,11 +44,13 @@ const SignUp = () => {
   };
 
   const handleVerifyEmail = () => {
-    if (!formData.email.endsWith('@kgkite.ac.in')) {
-      toast.error('Please use your college email (@kgkite.ac.in)');
+    const domain = role === 'student' ? '@kgkite.ac.in' : '@kgkite.alumni.ac.in';
+    if (!formData.email.endsWith(domain)) {
+      toast.error(`Please use your official email (${domain})`);
       return;
     }
-    setStudentVerified(true);
+    if (role === 'student') setStudentVerified(true);
+    if (role === 'alumni') setAlumniVerified(true);
     toast.success('Email verified! Complete your registration.');
   };
 
@@ -72,13 +75,13 @@ const SignUp = () => {
         mentorDomainPreference: formData.mentorDomainPreference,
       };
     } else if (role === 'alumni') {
-      if (!formData.username || !formData.password) {
+      if (!formData.email || !formData.password) {
         toast.error('Please fill in all required fields');
         return;
       }
       userData = {
-        username: formData.username,
-        email: `${formData.username.toLowerCase().replace(/\s+/g, '.')}@alumni.com`,
+        username: formData.email.split('@')[0],
+        email: formData.email,
         password: formData.password,
         role: 'alumni' as UserRole,
         batch: formData.batch,
@@ -141,6 +144,7 @@ const SignUp = () => {
                 onClick={() => {
                   setRole(r.value);
                   setStudentVerified(false);
+                  setAlumniVerified(false);
                 }}
                 className={`flex-1 py-3 text-nav rounded-xl transition-all duration-300 ${role === r.value
                   ? 'bg-card shadow-lg text-primary'
@@ -269,71 +273,97 @@ const SignUp = () => {
             {/* Alumni Form */}
             {role === 'alumni' && (
               <div className="space-y-5">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <input
-                    type="text"
-                    value={formData.username}
-                    onChange={(e) => updateField('username', e.target.value)}
-                    placeholder="Full Name (for username)"
-                    className="input-solid"
-                  />
-                  <input
-                    type="tel"
-                    value={formData.phone}
-                    onChange={(e) => updateField('phone', e.target.value)}
-                    placeholder="Phone Number"
-                    className="input-solid"
-                  />
-                </div>
-                <select
-                  value={formData.batch}
-                  onChange={(e) => updateField('batch', e.target.value)}
-                  className="input-solid"
-                >
-                  <option value="" disabled>Pass-out Batch</option>
-                  {batches.alumni.map((b) => (
-                    <option key={b} value={b}>{b}</option>
-                  ))}
-                </select>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="relative">
+                <div>
+                  <label className="text-label text-muted-foreground mb-2 block">
+                    Alumni Graduate Mail ID
+                  </label>
+                  <div className="relative flex gap-3">
                     <input
-                      type="url"
-                      value={formData.linkedin}
-                      onChange={(e) => updateField('linkedin', e.target.value)}
-                      placeholder="LinkedIn Profile"
-                      className="input-solid pr-12"
+                      type="email"
+                      value={formData.email}
+                      onChange={(e) => updateField('email', e.target.value)}
+                      placeholder="name@kgkite.alumni.ac.in"
+                      className="input-solid flex-1"
                     />
-                    <span className="absolute right-4 top-4 text-primary">
-                      <Linkedin size={20} />
-                    </span>
+                    <button
+                      type="button"
+                      onClick={handleVerifyEmail}
+                      className="px-6 bg-success text-success-foreground text-label rounded-2xl hover:bg-success/90 transition shadow-lg shadow-success/20"
+                    >
+                      VERIFY
+                    </button>
                   </div>
-                  <div className="relative">
-                    <input
-                      type="url"
-                      value={formData.github}
-                      onChange={(e) => updateField('github', e.target.value)}
-                      placeholder="GitHub Profile"
+                </div>
+
+                {alumniVerified && (
+                  <div className="space-y-5 animate-fade-up">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <input
+                        type="text"
+                        value={formData.username}
+                        onChange={(e) => updateField('username', e.target.value)}
+                        placeholder="Full Name"
+                        className="input-solid"
+                      />
+                      <input
+                        type="tel"
+                        value={formData.phone}
+                        onChange={(e) => updateField('phone', e.target.value)}
+                        placeholder="Phone Number"
+                        className="input-solid"
+                      />
+                    </div>
+                    <select
+                      value={formData.batch}
+                      onChange={(e) => updateField('batch', e.target.value)}
                       className="input-solid"
-                    />
+                    >
+                      <option value="" disabled>Pass-out Batch</option>
+                      {batches.alumni.map((b) => (
+                        <option key={b} value={b}>{b}</option>
+                      ))}
+                    </select>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="relative">
+                        <input
+                          type="url"
+                          value={formData.linkedin}
+                          onChange={(e) => updateField('linkedin', e.target.value)}
+                          placeholder="LinkedIn Profile"
+                          className="input-solid pr-12"
+                        />
+                        <span className="absolute right-4 top-4 text-primary">
+                          <Linkedin size={20} />
+                        </span>
+                      </div>
+                      <div className="relative">
+                        <input
+                          type="url"
+                          value={formData.github}
+                          onChange={(e) => updateField('github', e.target.value)}
+                          placeholder="GitHub Profile"
+                          className="input-solid"
+                        />
+                      </div>
+                    </div>
+                    <div className="relative">
+                      <input
+                        type={showPassword ? 'text' : 'password'}
+                        value={formData.password}
+                        onChange={(e) => updateField('password', e.target.value)}
+                        placeholder="Set Password"
+                        className="input-solid pr-12"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-4 top-4 text-muted-foreground"
+                      >
+                        {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                      </button>
+                    </div>
                   </div>
-                </div>
-                <div className="relative">
-                  <input
-                    type={showPassword ? 'text' : 'password'}
-                    value={formData.password}
-                    onChange={(e) => updateField('password', e.target.value)}
-                    placeholder="Set Password"
-                    className="input-solid pr-12"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-4 top-4 text-muted-foreground"
-                  >
-                    {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                  </button>
-                </div>
+                )}
               </div>
             )}
 
@@ -389,7 +419,7 @@ const SignUp = () => {
             {/* Submit Button */}
             <button
               type="submit"
-              disabled={isLoading || (role === 'student' && !studentVerified)}
+              disabled={isLoading || (role === 'student' && !studentVerified) || (role === 'alumni' && !alumniVerified)}
               className="w-full py-5 btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isLoading ? 'Creating Account...' : 'Initialize Account'}

@@ -105,7 +105,7 @@ export const register = async (req, res) => {
 // @access  Public
 export const login = async (req, res) => {
     try {
-        const { collegeEmail, password } = req.body;
+        const { collegeEmail, password, role: requiredRole } = req.body;
 
         // Validation
         if (!collegeEmail || !password) {
@@ -122,6 +122,14 @@ export const login = async (req, res) => {
             return res.status(401).json({
                 success: false,
                 message: 'Invalid credentials'
+            });
+        }
+
+        // Check for role consistency if requiredRole is provided
+        if (requiredRole && user.role !== requiredRole && user.role !== 'admin') {
+            return res.status(403).json({
+                success: false,
+                message: `This account does not have ${requiredRole} access.`
             });
         }
 

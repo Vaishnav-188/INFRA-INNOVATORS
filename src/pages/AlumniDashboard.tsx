@@ -33,7 +33,7 @@ const AlumniDashboard = () => {
   // Fetch settings
   const fetchSettings = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/system/settings');
+      const response = await fetch('/api/system/settings');
       const data = await response.json();
       if (data.success) {
         setSettings(data.settings);
@@ -50,7 +50,7 @@ const AlumniDashboard = () => {
     setIsDataLoading(true);
     try {
       // Fetch Donations
-      const donRes = await fetch('http://localhost:5000/api/donations/my', {
+      const donRes = await fetch('/api/donations/my', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const donData = await donRes.json();
@@ -59,13 +59,13 @@ const AlumniDashboard = () => {
       }
 
       // Fetch Jobs
-      const jobRes = await fetch('http://localhost:5000/api/jobs', {
+      const jobRes = await fetch('/api/jobs', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const jobData = await jobRes.json();
 
       // Fetch Events
-      const eveRes = await fetch('http://localhost:5000/api/events/my', {
+      const eveRes = await fetch('/api/events/my', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const eveData = await eveRes.json();
@@ -148,7 +148,7 @@ const AlumniDashboard = () => {
     setIsProcessing(true);
 
     try {
-      const response = await fetch('http://localhost:5000/api/donations', {
+      const response = await fetch('/api/donations', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -196,7 +196,7 @@ const AlumniDashboard = () => {
 
   return (
     <MainLayout>
-      <div ref={pageRef} className="pt-24 px-6 md:px-20 max-w-7xl mx-auto pb-20">
+      <div ref={pageRef} className="pt-40 px-6 md:px-20 max-w-7xl mx-auto pb-20">
         {/* Urgent Notification */}
         {settings?.donationSettings?.isDonationUrgent && (
           <div className="mb-8 p-4 bg-primary/10 border border-primary/20 rounded-2xl flex items-center justify-between animate-pulse-slow">
@@ -266,13 +266,15 @@ const AlumniDashboard = () => {
             <p className="font-bold text-foreground">Donate</p>
             <p className="text-xs text-muted-foreground">Support your alma mater</p>
           </GlassCard>
-          <GlassCard variant="light" className="p-6 text-center hover-lift cursor-pointer group">
-            <div className="w-14 h-14 mx-auto rounded-2xl bg-destructive/10 flex items-center justify-center mb-3 group-hover:bg-destructive/20 transition">
-              <Users className="text-destructive" size={24} />
-            </div>
-            <p className="font-bold text-foreground">Mentorship</p>
-            <p className="text-xs text-muted-foreground">Guide students</p>
-          </GlassCard>
+          <Link to="/mentorship">
+            <GlassCard variant="light" className="p-6 text-center hover-lift cursor-pointer group">
+              <div className="w-14 h-14 mx-auto rounded-2xl bg-destructive/10 flex items-center justify-center mb-3 group-hover:bg-destructive/20 transition">
+                <Users className="text-destructive" size={24} />
+              </div>
+              <p className="font-bold text-foreground">Mentorship</p>
+              <p className="text-xs text-muted-foreground">Guide students</p>
+            </GlassCard>
+          </Link>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">

@@ -215,7 +215,7 @@
 
   /* Card Styles */
   .card-glass {
-    @apply glass-light p-10 rounded-3xl border border-card;
+    @apply glass-light p-6 md:p-10 rounded-3xl border border-card;
   }
 
   .card-solid {
@@ -224,7 +224,7 @@
 
   /* Feed Container */
   .feed-container {
-    @apply w-full max-w-[680px];
+    @apply w-full max-w-[850px];
   }
 
   /* Reveal Animation Base */

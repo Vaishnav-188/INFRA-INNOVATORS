@@ -32,6 +32,7 @@ export const uploadStudentCSV = async (req, res) => {
         const errors = [];
         let inserted = 0;
         let skipped = 0;
+        const newUsers = []; // Track new users with their auto-generated passwords
 
         // Read CSV file
         fs.createReadStream(filePath)
@@ -129,6 +130,13 @@ export const uploadStudentCSV = async (req, res) => {
                         }
 
                         inserted++;
+                        newUsers.push({
+                            name: userData.name,
+                            email: userData.collegeEmail,
+                            password: password, // Original plain password
+                            batch: userData.batch,
+                            rollNumber: userData.rollNumber || 'N/A'
+                        });
                         console.log(`Created student: ${user.collegeEmail}, Password: ${password}`);
                     } catch (error) {
                         errors.push({
@@ -194,6 +202,7 @@ export const uploadAlumniCSV = async (req, res) => {
         const errors = [];
         let inserted = 0;
         let skipped = 0;
+        const newAlumni = [];
 
         // Read CSV file
         fs.createReadStream(filePath)
@@ -280,6 +289,13 @@ export const uploadAlumniCSV = async (req, res) => {
                         const user = await User.create(userData);
 
                         inserted++;
+                        newAlumni.push({
+                            name: userData.name,
+                            email: userData.collegeEmail,
+                            password: password,
+                            batch: userData.graduationYear,
+                            company: userData.currentCompany
+                        });
 
                         // In production, you would send this password via email
                         console.log(`Created alumni: ${user.collegeEmail}, Password: ${password}`);
@@ -304,7 +320,8 @@ export const uploadAlumniCSV = async (req, res) => {
                         totalRows: results.length,
                         inserted: inserted,
                         skipped: skipped,
-                        errors: errors
+                        errors: errors,
+                        newAlumni: newAlumni // Include alumni list with generated passwords
                     }
                 });
             })

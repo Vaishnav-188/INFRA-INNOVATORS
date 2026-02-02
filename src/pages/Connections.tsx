@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
-import { Users, CheckCircle, XCircle, Clock, Mail, Briefcase, MapPin, GraduationCap, ArrowRight } from 'lucide-react';
+import { Users, CheckCircle, XCircle, Clock, Mail, Briefcase, MapPin, GraduationCap, ArrowRight, MessageCircle } from 'lucide-react';
 import MainLayout from '@/components/layout/MainLayout';
 import GlassCard from '@/components/ui/GlassCard';
 import { usePageTransition } from '@/hooks/useGSAP';
@@ -26,7 +27,7 @@ const Connections = () => {
             const token = localStorage.getItem('alumni_hub_token');
             const queryParams = status ? `?status=${status}` : '';
 
-            const response = await fetch(`http://localhost:5000/api/connections${queryParams}`, {
+            const response = await fetch(`/api/connections${queryParams}`, {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
@@ -47,7 +48,7 @@ const Connections = () => {
     const fetchStats = async () => {
         try {
             const token = localStorage.getItem('alumni_hub_token');
-            const response = await fetch('http://localhost:5000/api/connections/stats', {
+            const response = await fetch('/api/connections/stats', {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
@@ -65,7 +66,7 @@ const Connections = () => {
     const handleStatusUpdate = async (connectionId, status) => {
         try {
             const token = localStorage.getItem('alumni_hub_token');
-            const response = await fetch(`http://localhost:5000/api/connections/${connectionId}/status`, {
+            const response = await fetch(`/api/connections/${connectionId}/status`, {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json',
@@ -146,8 +147,8 @@ const Connections = () => {
                             key={tab}
                             onClick={() => handleTabChange(tab)}
                             className={`px-8 py-3 rounded-2xl font-black text-xs uppercase tracking-widest transition-all ${activeTab === tab
-                                    ? 'bg-foreground text-background shadow-xl'
-                                    : 'bg-muted/50 text-muted-foreground hover:bg-muted'
+                                ? 'bg-foreground text-background shadow-xl'
+                                : 'bg-muted/50 text-muted-foreground hover:bg-muted'
                                 }`}
                         >
                             {tab}
@@ -238,9 +239,18 @@ const Connections = () => {
                                                 <p className="text-[10px] font-black text-muted-foreground/40 uppercase tracking-widest">
                                                     Connected {new Date(connection.createdAt).toLocaleDateString()}
                                                 </p>
-                                                <button className="w-10 h-10 bg-muted rounded-xl flex items-center justify-center text-muted-foreground hover:text-primary transition-colors">
-                                                    <Mail size={18} />
-                                                </button>
+                                                {connection.status === 'accepted' ? (
+                                                    <Link
+                                                        to={`/mentorship-chat/${connection._id}`}
+                                                        className="w-10 h-10 bg-primary/10 hover:bg-primary rounded-xl flex items-center justify-center text-primary hover:text-primary-foreground transition-all group"
+                                                    >
+                                                        <MessageCircle size={18} className="group-hover:scale-110 transition-transform" />
+                                                    </Link>
+                                                ) : (
+                                                    <div className="w-10 h-10 bg-muted rounded-xl flex items-center justify-center text-muted-foreground cursor-not-allowed opacity-50">
+                                                        <Mail size={18} />
+                                                    </div>
+                                                )}
                                             </>
                                         )}
                                     </div>

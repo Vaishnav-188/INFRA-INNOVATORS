@@ -43,7 +43,7 @@ const AlumniMatching = () => {
         setLoading(true);
         try {
             const token = localStorage.getItem('alumni_hub_token');
-            let url = `http://localhost:5000/api/connections/match`;
+            let url = `/api/connections/match`;
             const params = new URLSearchParams();
             if (interests) params.append('interests', interests);
             if (domain) params.append('domain', domain);
@@ -71,7 +71,7 @@ const AlumniMatching = () => {
     const fetchMyConnections = async () => {
         try {
             const token = localStorage.getItem('alumni_hub_token');
-            const response = await fetch('http://localhost:5000/api/connections', {
+            const response = await fetch('/api/connections', {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
@@ -93,7 +93,7 @@ const AlumniMatching = () => {
     const handleConnect = async (alumniId) => {
         try {
             const token = localStorage.getItem('alumni_hub_token');
-            const response = await fetch('http://localhost:5000/api/connections', {
+            const response = await fetch('/api/connections', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

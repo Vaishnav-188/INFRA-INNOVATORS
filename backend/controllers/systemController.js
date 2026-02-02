@@ -43,6 +43,13 @@ export const updateSettings = async (req, res) => {
             settings.collegeEmailDomain = req.body.collegeEmailDomain;
         }
 
+        if (req.body.homepageSettings) {
+            settings.homepageSettings = {
+                ...settings.homepageSettings,
+                ...req.body.homepageSettings
+            };
+        }
+
         settings.updatedBy = req.user._id;
         await settings.save();
 
@@ -84,6 +91,27 @@ export const uploadQrCode = async (req, res) => {
         });
     } catch (error) {
         console.error('Error uploading QR code:', error);
+        res.status(500).json({ success: false, message: 'Server error' });
+    }
+};
+// @desc    Upload generic image (gallery/story)
+// @route   POST /api/system/upload-image
+// @access  Private (Admin only)
+export const uploadImage = async (req, res) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({ success: false, message: 'Please upload an image' });
+        }
+
+        const imageUrl = `http://localhost:5000/uploads/images/${req.file.filename}`;
+
+        res.json({
+            success: true,
+            message: 'Image uploaded successfully',
+            imageUrl
+        });
+    } catch (error) {
+        console.error('Error uploading image:', error);
         res.status(500).json({ success: false, message: 'Server error' });
     }
 };

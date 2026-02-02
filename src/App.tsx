@@ -12,9 +12,13 @@ import SignUp from "./pages/SignUp";
 import Events from "./pages/Events";
 import Jobs from "./pages/Jobs";
 import AdminDashboard from "./pages/AdminDashboard";
+import AdminUserDirectory from "./pages/AdminUserDirectory";
 import StudentDashboard from "./pages/StudentDashboard";
+import StudentMentorship from "./pages/StudentMentorship";
 import AlumniDashboard from "./pages/AlumniDashboard";
 import AlumniMatching from "./pages/AlumniMatching";
+import AlumniMentorship from "./pages/AlumniMentorship";
+import MentorshipChat from "./pages/MentorshipChat";
 import Connections from "./pages/Connections";
 import NotFound from "./pages/NotFound";
 
@@ -37,9 +41,13 @@ const App = () => (
 
             {/* Protected Routes */}
             <Route path="/admin" element={<AdminDashboard />} />
+            <Route path="/admin/directory" element={<AdminUserDirectory />} />
             <Route path="/student" element={<StudentDashboard />} />
+            <Route path="/student/mentorship" element={<StudentMentorship />} />
             <Route path="/alumni" element={<AlumniDashboard />} />
             <Route path="/matching" element={<AlumniMatching />} />
+            <Route path="/mentorship" element={<AlumniMentorship />} />
+            <Route path="/mentorship-chat/:mentorshipId" element={<MentorshipChat />} />
             <Route path="/connections" element={<Connections />} />
 
             {/* Catch-all */}
