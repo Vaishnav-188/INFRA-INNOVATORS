@@ -240,10 +240,10 @@ const AlumniDashboard = () => {
           <Link to="/events">
             <GlassCard variant="light" className="p-6 text-center hover-lift cursor-pointer group">
               <div className="w-14 h-14 mx-auto rounded-2xl bg-primary/10 flex items-center justify-center mb-3 group-hover:bg-primary/20 transition">
-                <PlusCircle className="text-primary" size={24} />
+                <Calendar className="text-primary" size={24} />
               </div>
-              <p className="font-bold text-foreground">Post Event</p>
-              <p className="text-xs text-muted-foreground">Share with community</p>
+              <p className="font-bold text-foreground">View Events</p>
+              <p className="text-xs text-muted-foreground">Explore community meetups</p>
             </GlassCard>
           </Link>
           <Link to="/jobs">
@@ -251,8 +251,8 @@ const AlumniDashboard = () => {
               <div className="w-14 h-14 mx-auto rounded-2xl bg-success/10 flex items-center justify-center mb-3 group-hover:bg-success/20 transition">
                 <Briefcase className="text-success" size={24} />
               </div>
-              <p className="font-bold text-foreground">Post Job</p>
-              <p className="text-xs text-muted-foreground">Help students grow</p>
+              <p className="font-bold text-foreground">View Jobs</p>
+              <p className="text-xs text-muted-foreground">Discover career growth</p>
             </GlassCard>
           </Link>
           <GlassCard

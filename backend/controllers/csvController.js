@@ -47,10 +47,11 @@ export const uploadStudentCSV = async (req, res) => {
 
                 // Process each row
                 for (const [index, row] of results.entries()) {
+                    let email = null;
                     try {
                         // Required fields check (now case-insensitive due to mapHeaders)
                         const name = row.name || row.fullname || row.studentname;
-                        const email = row.collegeemail || row.email || row.college_email;
+                        email = row.collegeemail || row.email || row.college_email;
 
                         if (!name || !email) {
                             errors.push({
@@ -88,15 +89,16 @@ export const uploadStudentCSV = async (req, res) => {
                         }
 
                         // Create new user if not exists
-                        const password = row.password || generatePassword();
+                        // DO NOT SET PASSWORD - user will set it during first-time signup
                         const projectDomains = row.projectdomains ? row.projectdomains.split(',').map(d => d.trim()) : [];
                         const interests = row.interests ? row.interests.split(',').map(i => i.trim()) : [];
 
+                        const emailPrefix = email.split('@')[0].toLowerCase();
                         const userData = {
                             name: name.trim(),
-                            username: row.username ? row.username.trim().toLowerCase() : name.trim().toLowerCase().replace(/\s+/g, '.'),
+                            username: row.username ? row.username.trim().toLowerCase() : emailPrefix,
                             collegeEmail: email.toLowerCase().trim(),
-                            password: password,
+                            password: 'TEMP_WILL_BE_SET_BY_USER',
                             role: 'student',
                             mobileNumber: row.mobilenumber || row.phone ? (row.mobilenumber || row.phone).trim() : undefined,
                             rollNumber: row.rollnumber ? row.rollnumber.trim() : undefined,
@@ -107,11 +109,19 @@ export const uploadStudentCSV = async (req, res) => {
                             githubRepo: row.githubrepo ? row.githubrepo.trim() : undefined,
                             projectDomains: projectDomains,
                             interests: interests,
-                            isVerified: true
+                            isVerified: true,
+                            passwordInitialized: false
                         };
 
                         Object.keys(userData).forEach(key => userData[key] === undefined && delete userData[key]);
                         user = await User.create(userData);
+
+                        // Push to newUsers for response
+                        newUsers.push({
+                            name: user.name,
+                            email: user.collegeEmail,
+                            password: 'User will set'
+                        });
 
                         // Also add to PreVerifiedStudent for auto-verification if they sign up manually later
                         try {
@@ -130,18 +140,11 @@ export const uploadStudentCSV = async (req, res) => {
                         }
 
                         inserted++;
-                        newUsers.push({
-                            name: userData.name,
-                            email: userData.collegeEmail,
-                            password: password, // Original plain password
-                            batch: userData.batch,
-                            rollNumber: userData.rollNumber || 'N/A'
-                        });
-                        console.log(`Created student: ${user.collegeEmail}, Password: ${password}`);
+                        console.log(`Created student (password pending): ${user.collegeEmail}`);
                     } catch (error) {
                         errors.push({
                             row: index + 2,
-                            email: row.collegeEmail,
+                            email: email || 'Unknown',
                             error: error.message
                         });
                         skipped++;
@@ -159,7 +162,8 @@ export const uploadStudentCSV = async (req, res) => {
                         totalRows: results.length,
                         inserted: inserted,
                         skipped: skipped,
-                        errors: errors
+                        errors: errors,
+                        newUsers: newUsers
                     }
                 });
             })
@@ -217,10 +221,11 @@ export const uploadAlumniCSV = async (req, res) => {
 
                 // Process each row
                 for (const [index, row] of results.entries()) {
+                    let email = null;
                     try {
                         // Required fields check
                         const name = row.name || row.fullname || row.alumniname;
-                        const email = row.collegeemail || row.email || row.college_email;
+                        email = row.collegeemail || row.email || row.college_email;
 
                         if (!name || !email) {
                             errors.push({
@@ -246,8 +251,8 @@ export const uploadAlumniCSV = async (req, res) => {
                             continue;
                         }
 
-                        // Use provided password or generate one
-                        const password = row.password || generatePassword();
+                        // Use provided password or default
+                        // DO NOT SET PASSWORD - alumni will set it during first-time signup
 
                         // Determine placement status
                         const currentCompany = row.currentcompany ? row.currentcompany.trim() : (row.company ? row.company.trim() : 'Not Placed');
@@ -257,12 +262,13 @@ export const uploadAlumniCSV = async (req, res) => {
                         const skills = row.skills ? row.skills.split(',').map(s => s.trim()) : [];
                         const interests = row.interests ? row.interests.split(',').map(i => i.trim()) : [];
 
+                        const emailPrefix = email.split('@')[0].toLowerCase();
                         // Create alumni user with all fields
                         const userData = {
                             name: name.trim(),
-                            username: row.username ? row.username.trim().toLowerCase() : name.trim().toLowerCase().replace(/\s+/g, '.'),
+                            username: row.username ? row.username.trim().toLowerCase() : `${emailPrefix}_alum`,
                             collegeEmail: email.toLowerCase().trim(),
-                            password: password,
+                            password: 'TEMP_WILL_BE_SET_BY_USER',
                             role: 'alumni',
                             mobileNumber: row.mobilenumber || row.phone ? (row.mobilenumber || row.phone).trim() : undefined,
                             department: row.department ? row.department.trim() : undefined,
@@ -280,7 +286,8 @@ export const uploadAlumniCSV = async (req, res) => {
                             github: row.github ? row.github.trim() : undefined,
                             bio: row.bio ? row.bio.trim() : undefined,
                             isAvailableForMentorship: row.isavailableformentorship !== 'false',
-                            isVerified: true
+                            isVerified: true,
+                            passwordInitialized: false
                         };
 
                         // Remove undefined fields
@@ -288,21 +295,19 @@ export const uploadAlumniCSV = async (req, res) => {
 
                         const user = await User.create(userData);
 
-                        inserted++;
+                        // Push to newAlumni for response
                         newAlumni.push({
-                            name: userData.name,
-                            email: userData.collegeEmail,
-                            password: password,
-                            batch: userData.graduationYear,
-                            company: userData.currentCompany
+                            name: user.name,
+                            email: user.collegeEmail,
+                            password: 'User will set'
                         });
 
-                        // In production, you would send this password via email
-                        console.log(`Created alumni: ${user.collegeEmail}, Password: ${password}`);
+                        inserted++;
+                        console.log(`Created alumni (password pending): ${user.collegeEmail}`);
                     } catch (error) {
                         errors.push({
                             row: index + 2,
-                            email: row.collegeEmail,
+                            email: email || 'Unknown',
                             error: error.message
                         });
                         skipped++;
@@ -321,7 +326,7 @@ export const uploadAlumniCSV = async (req, res) => {
                         inserted: inserted,
                         skipped: skipped,
                         errors: errors,
-                        newAlumni: newAlumni // Include alumni list with generated passwords
+                        newAlumni: newAlumni
                     }
                 });
             })

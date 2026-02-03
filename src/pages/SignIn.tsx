@@ -26,7 +26,7 @@ const SignIn = () => {
       case 'student':
         return 'roll_no@kgkite.ac.in';
       case 'alumni':
-        return 'name@kgkite.alumni.ac.in';
+        return 'name@kgkite.ac.in or @kgkite.alumni.ac.in';
       case 'admin':
         return 'Admin Email (admin@college.edu)';
       default:
@@ -173,7 +173,7 @@ const SignIn = () => {
             <div className="text-xs text-muted-foreground space-y-1">
               <p>• Admin: admin@college.edu / Admin@123</p>
               <p>• Student: student1@kgkite.ac.in / Student@123</p>
-              <p>• Alumni: alumni1@kgkite.ac.in / Alumni@123</p>
+              <p>• Alumni: arjun.das@kgkite.alumni.ac.in / Alumni@123</p>
             </div>
           </div>
         </div>

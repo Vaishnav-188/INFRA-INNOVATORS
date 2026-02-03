@@ -9,7 +9,87 @@ const generateToken = (id) => {
     });
 };
 
-// @desc    Register new user
+// @desc    Verify email exists in pre-verified list
+// @route   POST /api/auth/verify-email
+// @access  Public
+export const verifyEmail = async (req, res) => {
+    try {
+        const { collegeEmail, role } = req.body;
+
+        if (!collegeEmail || !role) {
+            return res.status(400).json({
+                success: false,
+                message: 'Please provide email and role'
+            });
+        }
+
+        const email = collegeEmail.toLowerCase().trim();
+
+        // Check if user already exists
+        const existingUser = await User.findOne({ collegeEmail: email });
+
+        if (existingUser) {
+            // User exists - check if password is initialized
+            if (existingUser.passwordInitialized) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Account already exists. Please login instead.',
+                    accountExists: true
+                });
+            } else {
+                // User exists but hasn't set password yet (from CSV upload)
+                return res.status(200).json({
+                    success: true,
+                    message: 'Email verified. Please set your password.',
+                    verified: true,
+                    user: {
+                        name: existingUser.name,
+                        email: existingUser.collegeEmail,
+                        role: existingUser.role
+                    }
+                });
+            }
+        }
+
+        // Check if email is in pre-verified list for students
+        if (role === 'student') {
+            const preVerified = await PreVerifiedStudent.findOne({
+                collegeEmail: email
+            });
+
+            if (preVerified) {
+                return res.status(200).json({
+                    success: true,
+                    message: 'Email verified. Please set your password.',
+                    verified: true,
+                    preVerified: true,
+                    user: {
+                        name: preVerified.name,
+                        email: preVerified.collegeEmail,
+                        role: 'student'
+                    }
+                });
+            }
+        }
+
+        // Email not found in system
+        return res.status(404).json({
+            success: false,
+            message: `Email not found in our records. Please contact admin to add you to the system.`,
+            verified: false
+        });
+
+    } catch (error) {
+        console.error('Email verification error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Server error during email verification',
+            error: error.message
+        });
+    }
+};
+
+// @desc    Register new user (after email verification)
 // @route   POST /api/auth/register
 // @access  Public
 export const register = async (req, res) => {
@@ -24,47 +104,84 @@ export const register = async (req, res) => {
             });
         }
 
-        // Check if user already exists
-        const existingUser = await User.findOne({ collegeEmail: collegeEmail.toLowerCase() });
+        const email = collegeEmail.toLowerCase().trim();
 
-        if (existingUser) {
+        // Check if user already exists
+        let existingUser = await User.findOne({ collegeEmail: email });
+
+        if (existingUser && existingUser.passwordInitialized) {
             return res.status(400).json({
                 success: false,
-                message: 'User with this email already exists'
+                message: 'User with this email already exists. Please login.'
             });
         }
 
-        // Check if user exists in pre-verified list (for students)
+        let user;
         let isAutoVerified = false;
-        if (role === 'student' || !role) {
-            const preVerified = await PreVerifiedStudent.findOne({
-                collegeEmail: collegeEmail.toLowerCase().trim()
-            });
-            console.log(`[DEBUG] Registration check for ${collegeEmail}: preVerified Found? ${!!preVerified}`);
-            if (preVerified) {
-                isAutoVerified = true;
+
+        if (existingUser) {
+            // User exists from CSV upload - just set password
+            existingUser.password = password;
+            existingUser.passwordInitialized = true;
+
+            // Update other fields if provided
+            if (otherFields.mobileNumber) existingUser.mobileNumber = otherFields.mobileNumber;
+            if (otherFields.linkedIn) existingUser.linkedIn = otherFields.linkedIn;
+            if (otherFields.github) existingUser.github = otherFields.github;
+
+            await existingUser.save();
+            user = existingUser;
+            isAutoVerified = user.isVerified;
+        } else {
+            // Check if email is pre-verified for students
+            if (role === 'student') {
+                const preVerified = await PreVerifiedStudent.findOne({
+                    collegeEmail: email
+                });
+                if (preVerified) {
+                    isAutoVerified = true;
+                }
+            }
+
+            // Create new user
+            const userData = {
+                name,
+                collegeEmail: email,
+                password,
+                role: role || 'student',
+                isVerified: isAutoVerified || role === 'alumni', // Admins now need manual approval
+                passwordInitialized: true,
+                ...otherFields
+            };
+
+            user = await User.create(userData);
+
+            // Add to PreVerifiedStudent for future reference
+            if (role === 'student' && isAutoVerified) {
+                try {
+                    await PreVerifiedStudent.findOneAndUpdate(
+                        { collegeEmail: email },
+                        {
+                            name: user.name,
+                            rollNumber: otherFields.rollNumber || 'N/A',
+                            department: otherFields.department,
+                            batch: otherFields.batch
+                        },
+                        { upsert: true }
+                    );
+                } catch (e) {
+                    console.error('Error updating pre-verified list:', e);
+                }
             }
         }
 
-        // Create user
-        const userData = {
-            name,
-            collegeEmail: collegeEmail.toLowerCase(),
-            password,
-            role: role || 'student',
-            isVerified: isAutoVerified || role === 'alumni',
-            ...otherFields
-        };
+        console.log(`[REGISTER] User registered: ${user.collegeEmail}, Role: ${user.role}, Verified: ${user.isVerified}`);
 
-        console.log(`[DEBUG] Creating user: ${collegeEmail}, role: ${userData.role}, isVerified: ${userData.isVerified}`);
-        const user = await User.create(userData);
-        console.log(`[DEBUG] User created! _id: ${user._id}, isVerified: ${user.isVerified}`);
-
-        // For students and admins, we don't return a token yet because they need admin approval
-        if ((user.role === 'student' || user.role === 'admin') && !user.isVerified) {
+        // For unverified users, don't return token
+        if (!user.isVerified) {
             return res.status(201).json({
                 success: true,
-                message: 'Registration successful! Your account is pending admin approval. You will be able to login once verified.',
+                message: 'Registration successful! Your account is pending admin approval.',
                 user: {
                     _id: user._id,
                     name: user.name,
@@ -75,12 +192,12 @@ export const register = async (req, res) => {
             });
         }
 
-        // Generate token for verified users (including alumni and admin)
+        // Generate token for verified users
         const token = generateToken(user._id);
 
         res.status(201).json({
             success: true,
-            message: 'User registered successfully',
+            message: 'Registration successful!',
             token,
             user: {
                 _id: user._id,
@@ -116,9 +233,10 @@ export const login = async (req, res) => {
         }
 
         // Check for user (include password for comparison)
-        const user = await User.findOne({ collegeEmail: collegeEmail.toLowerCase() }).select('+password');
+        const user = await User.findOne({ collegeEmail: collegeEmail.toLowerCase().trim() }).select('+password');
 
         if (!user) {
+            console.log(`[DEBUG] Login failed: User not found with email ${collegeEmail}`);
             return res.status(401).json({
                 success: false,
                 message: 'Invalid credentials'
@@ -126,10 +244,21 @@ export const login = async (req, res) => {
         }
 
         // Check for role consistency if requiredRole is provided
-        if (requiredRole && user.role !== requiredRole && user.role !== 'admin') {
+        // Admin can login as any role, but students/alumni must match their registration
+        if (requiredRole && user.role !== 'admin' && user.role !== requiredRole) {
+            console.log(`[DEBUG] Login failed: Role mismatch. User is ${user.role}, required ${requiredRole}`);
+
+            // Helpful message for students who have transitioned to alumni
+            if (user.role === 'alumni' && requiredRole === 'student') {
+                return res.status(403).json({
+                    success: false,
+                    message: 'Your account has been upgraded to Alumni. Please select Alumni role to login.'
+                });
+            }
+
             return res.status(403).json({
                 success: false,
-                message: `This account does not have ${requiredRole} access.`
+                message: `This account is registered as ${user.role.charAt(0).toUpperCase() + user.role.slice(1)}. Please select the correct role.`
             });
         }
 
@@ -137,14 +266,18 @@ export const login = async (req, res) => {
         const isPasswordMatch = await user.matchPassword(password);
 
         if (!isPasswordMatch) {
+            console.log(`[DEBUG] Login failed: Password mismatch for ${collegeEmail}`);
             return res.status(401).json({
                 success: false,
                 message: 'Invalid credentials'
             });
         }
 
-        // Check if user is verified (for students and admins)
-        if ((user.role === 'student' || user.role === 'admin') && !user.isVerified) {
+        // Check if user is verified
+        // Admins are always allowed to login to manage the system
+        // Students and Alumni (especially transitioned ones) need verification
+        if (user.role !== 'admin' && !user.isVerified) {
+            console.log(`[DEBUG] Login blocked: User ${collegeEmail} (${user.role}) is NOT verified`);
             return res.status(403).json({
                 success: false,
                 message: 'Your account is pending admin approval. Please wait for verification.'

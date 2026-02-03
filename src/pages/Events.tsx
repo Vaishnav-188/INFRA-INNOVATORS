@@ -43,7 +43,7 @@ const Events = () => {
     fetchEvents();
   }, []);
 
-  const canPost = user?.role === 'alumni' || user?.role === 'admin';
+  const canPost = user?.role === 'admin' || user?.role === 'alumni';
 
   const handleAddPost = async () => {
     if (!newPostText.trim() || !eventTitle.trim()) {
@@ -216,7 +216,7 @@ const Events = () => {
 
                       {openDropdown === event._id && (
                         <div className="absolute right-0 mt-3 w-56 bg-card border border-border rounded-2xl shadow-2xl z-50 py-3 animate-fade-in ring-1 ring-black/5">
-                          {(user?.role === 'admin' || (event.organizer?._id === user?.id || event.organizer === user?.id)) && (
+                          {(user?.role === 'admin' || (user?.role === 'alumni' && event.organizer?._id === user?.id)) && (
                             <button
                               onClick={() => handleEdit(event)}
                               className="w-full text-left px-5 py-3 text-[10px] font-black uppercase tracking-widest text-foreground hover:bg-primary/10 hover:text-primary flex items-center gap-3 transition"
@@ -224,7 +224,7 @@ const Events = () => {
                               <Edit3 size={16} /> EDIT EVENT
                             </button>
                           )}
-                          {(user?.role === 'admin' || (event.organizer?._id === user?.id || event.organizer === user?.id)) && (
+                          {(user?.role === 'admin' || (user?.role === 'alumni' && event.organizer?._id === user?.id)) && (
                             <button
                               onClick={() => handleDelete(event._id)}
                               className="w-full text-left px-5 py-3 text-[10px] font-black uppercase tracking-widest text-destructive hover:bg-destructive/10 flex items-center gap-3 transition"

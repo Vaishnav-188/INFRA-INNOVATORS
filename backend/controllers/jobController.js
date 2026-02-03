@@ -99,12 +99,23 @@ export const createJob = async (req, res) => {
         } = req.body;
 
         // Validation
-        if (!title || !company || !companyWebsiteURL || !description || !location) {
-            return res.status(400).json({
+        if (!req.user || !req.user._id) {
+            console.error('[ERROR] createJob: No user found in request');
+            return res.status(401).json({
                 success: false,
-                message: 'Please provide all required fields'
+                message: 'User authentication failed. Please login again.'
             });
         }
+
+        console.log('[DEBUG] Creating job with body:', JSON.stringify(req.body, null, 2));
+        console.log('[DEBUG] User ID:', req.user._id);
+
+        // Sanitize salary
+        const sanitizedSalary = {
+            min: salary?.min || 0,
+            max: salary?.max || 0,
+            currency: salary?.currency || 'INR'
+        };
 
         // Create job
         const job = await Job.create({
@@ -113,13 +124,15 @@ export const createJob = async (req, res) => {
             companyWebsiteURL,
             description,
             location,
-            jobType,
-            salary,
-            experienceRequired,
-            skills,
-            deadline,
+            jobType: jobType || 'full-time',
+            salary: sanitizedSalary,
+            experienceRequired: experienceRequired || '',
+            skills: Array.isArray(skills) ? skills : [],
+            deadline: deadline || undefined,
             postedBy: req.user._id
         });
+
+        console.log('[DEBUG] Job created successfully:', job._id);
 
         const populatedJob = await Job.findById(job._id)
             .populate('postedBy', 'name role currentCompany');
@@ -130,7 +143,18 @@ export const createJob = async (req, res) => {
             job: populatedJob
         });
     } catch (error) {
-        console.error('Error creating job:', error);
+        console.error('[ERROR] createJob catch block:', error);
+
+        // Detailed error reporting for validation failures
+        if (error.name === 'ValidationError') {
+            const messages = Object.values(error.errors).map(val => val.message);
+            return res.status(400).json({
+                success: false,
+                message: 'Validation Error',
+                error: messages.join(', ')
+            });
+        }
+
         res.status(500).json({
             success: false,
             message: 'Server error while creating job',

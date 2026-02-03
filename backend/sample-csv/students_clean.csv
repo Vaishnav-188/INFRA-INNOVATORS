@@ -1,51 +1,51 @@
-name,username,collegeEmail,password,mobileNumber,rollNumber,registerNumber,department,yearOfStudy,batch,githubRepo,projectDomains,interests
-Aarav Kumar,aarav01,aarav.kumar@kgkite.ac.in,Student@123,9876543210,2022001,REG2022001,Computer Science,3,2022-2026,https://github.com/aaravkumar,"AI/ML,Web Development","Python,React,Machine Learning"
-Diya Sharma,diya02,gkite.ac.indiya.sharma@k,Student@123,9876543211,2022002,REG2022002,Computer Science,3,2022-2026,https://github.com/diyasharma,"Web Development,Mobile Apps","JavaScript,Flutter,Node.js"
-Arjun Patel,arjun03,arjun.patel@kgkite.ac.in,Student@123,9876543212,2022003,REG2022003,Information Technology,3,2022-2026,https://github.com/arjunpatel,"Cloud Computing,DevOps","AWS,Docker,Python"
-Ananya Singh,ananya04,ananya.singh@kgkite.ac.in,Student@123,9876543213,2022004,REG2022004,Computer Science,3,2022-2026,https://github.com/ananyasingh,"Data Science,AI/ML","Python,TensorFlow,Pandas"
-Rohan Reddy,rohan05,rohan.reddy@kgkite.ac.in,Student@123,9876543214,2022005,REG2022005,Information Technology,3,2022-2026,https://github.com/rohanreddy,"Full Stack,Web Development","React,Node.js,MongoDB"
-Isha Gupta,isha06,isha.gupta@kgkite.ac.in,Student@123,9876543215,2022006,REG2022006,Computer Science,3,2022-2026,https://github.com/ishagupta,"Cybersecurity,Blockchain","Python,Solidity,Ethical Hacking"
-Vihaan Mehta,vihaan07,vihaan.mehta@kgkite.ac.in,Student@123,9876543216,2022007,REG2022007,Electronics,3,2022-2026,https://github.com/vihaanmehta,"IoT,Embedded Systems","C++,Arduino,Raspberry Pi"
-Saanvi Joshi,saanvi08,saanvi.joshi@kgkite.ac.in,Student@123,9876543217,2022008,REG2022008,Information Technology,3,2022-2026,https://github.com/saanvijoshi,"UI/UX,Frontend","Figma,React,CSS"
-Aditya Verma,aditya09,aditya.verma@kgkite.ac.in,Student@123,9876543218,2022009,REG2022009,Computer Science,3,2022-2026,https://github.com/adityaverma,"Game Development,Graphics","Unity,C#,Blender"
-Kavya Nair,kavya10,kavya.nair@kgkite.ac.in,Student@123,9876543219,2022010,REG2022010,Information Technology,3,2022-2026,https://github.com/kavyanair,"Cloud Native,Microservices","Java,Spring Boot,Kubernetes"
-Ayaan Khan,ayaan11,ayaan.khan@kgkite.ac.in,Student@123,9876543220,2023001,REG2023001,Computer Science,2,2023-2027,https://github.com/ayaankhan,"Mobile Development,Android","Kotlin,Java,Firebase"
-Mira Desai,mira12,mira.desai@kgkite.ac.in,Student@123,9876543221,2023002,REG2023002,Information Technology,2,2023-2027,https://github.com/miradesai,"Backend Development,APIs","Python,Django,PostgreSQL"
-Reyansh Pillai,reyansh13,reyansh.pillai@kgkite.ac.in,Student@123,9876543222,2023003,REG2023003,Computer Science,2,2023-2027,https://github.com/reyanshpillai,"Machine Learning,NLP","Python,NLTK,Transformers"
-Aadhya Iyer,aadhya14,aadhya.iyer@kgkite.ac.in,Student@123,9876543223,2023004,REG2023004,Electronics,2,2023-2027,https://github.com/aadhyaiyer,"Robotics,Automation","Python,ROS,MATLAB"
-Vivaan Rao,vivaan15,vivaan.rao@kgkite.ac.in,Student@123,9876543224,2023005,REG2023005,Information Technology,2,2023-2027,https://github.com/vivaanrao,"Data Engineering,Big Data","Spark,Hadoop,Scala"
-Kiara Menon,kiara16,kiara.menon@kgkite.ac.in,Student@123,9876543225,2023006,REG2023006,Computer Science,2,2023-2027,https://github.com/kiaramenon,"AR/VR,3D Graphics","Unity,ARCore,Three.js"
-Ishaan Kapoor,ishaan17,ishaan.kapoor@kgkite.ac.in,Student@123,9876543226,2023007,REG2023007,Information Technology,2,2023-2027,https://github.com/ishaankapoor,"Blockchain,DeFi","Solidity,Web3,Ethereum"
-Myra Shetty,myra18,myra.shetty@kgkite.ac.in,Student@123,9876543227,2023008,REG2023008,Computer Science,2,2023-2027,https://github.com/myrashetty,"Computer Vision,Image Processing","OpenCV,Python,PyTorch"
-Advait Bhat,advait19,advait.bhat@kgkite.ac.in,Student@123,9876543228,2023009,REG2023009,Electronics,2,2023-2027,https://github.com/advaitbhat,"VLSI Design,Chip Design","Verilog,VHDL,Cadence"
-Zara Raghavan,zara20,zara.raghavan@kgkite.ac.in,Student@123,9876543229,2023010,REG2023010,Information Technology,2,2023-2027,https://github.com/zararaghavan,"Full Stack,MERN","MongoDB,Express,React,Node.js"
-Dhruv Agarwal,dhruv21,dhruv.agarwal@kgkite.ac.in,Student@123,9876543230,2024001,REG2024001,Computer Science,1,2024-2028,https://github.com/dhruvagarwal,"AI/ML,Deep Learning","Python,Keras,JAX"
-Navya Kulkarni,navya22,navya.kulkarni@kgkite.ac.in,Student@123,9876543231,2024002,REG2024002,Information Technology,1,2024-2028,https://github.com/navyakulkarni,"Web Development,Frontend","HTML,CSS,JavaScript,Vue.js"
-Arnav Pandey,arnav23,arnav.pandey@kgkite.ac.in,Student@123,9876543232,2024003,REG2024003,Computer Science,1,2024-2028,https://github.com/arnavpandey,"Competitive Programming,DSA","C++,Algorithms,Data Structures"
-Riya Chatterjee,riya24,riya.chatterjee@kgkite.ac.in,Student@123,9876543233,2024004,REG2024004,Electronics,1,2024-2028,https://github.com/riyachatterjee,"Signal Processing,Audio","MATLAB,DSP,Audio Engineering"
-Kabir Malhotra,kabir25,kabir.malhotra@kgkite.ac.in,Student@123,9876543234,2024005,REG2024005,Information Technology,1,2024-2028,https://github.com/kabirmalhotra,"Ethical Hacking,Security","Kali Linux,Python,Network Security"
-Anika Banerjee,anika26,anika.banerjee@kgkite.ac.in,Student@123,9876543235,2024006,REG2024006,Computer Science,1,2024-2028,https://github.com/anikabanerjee,"Software Engineering,Testing","Java,Selenium,JUnit"
-Yash Tiwari,yash27,yash.tiwari@kgkite.ac.in,Student@123,9876543236,2024007,REG2024007,Information Technology,1,2024-2028,https://github.com/yashtiwari,"Mobile Apps,Cross-Platform","React Native,Flutter,Dart"
-Siya Saxena,siya28,siya.saxena@kgkite.ac.in,Student@123,9876543237,2024008,REG2024008,Computer Science,1,2024-2028,https://github.com/siyasaxena,"Data Analytics,BI","Python,Tableau,Power BI"
-Atharv Jain,atharv29,atharv.jain@kgkite.ac.in,Student@123,9876543238,2024009,REG2024009,Electronics,1,2024-2028,https://github.com/atharvjain,"Robotics,AI","Python,Computer Vision,ROS2"
-Pihu Ghosh,pihu30,pihu.ghosh@kgkite.ac.in,Student@123,9876543239,2024010,REG2024010,Information Technology,1,2024-2028,https://github.com/pihu ghosh,"Product Design,UI/UX","Figma,Adobe XD,Prototyping"
-Krish Bhatt,krish31,krish.bhatt@kgkite.ac.in,Student@123,9876543240,2022011,REG2022011,Mechanical,3,2022-2026,https://github.com/krishbhatt,"CAD Design,Simulation","SolidWorks,ANSYS,AutoCAD"
-Prisha Dubey,prisha32,prisha.dubey@kgkite.ac.in,Student@123,9876543241,2022012,REG2022012,Civil,3,2022-2026,https://github.com/prishadubey,"Structural Engineering,BIM","Revit,STAAD Pro,Civil 3D"
-Shaurya Mishra,shaurya33,shaurya.mishra@kgkite.ac.in,Student@123,9876543242,2022013,REG2022013,Electrical,3,2022-2026,https://github.com/shauryamishra,"Power Systems,Renewable","MATLAB,PSCAD,Solar Energy"
-Anvi Thakur,anvi34,anvi.thakur@kgkite.ac.in,Student@123,9876543243,2022014,REG2022014,Mechanical,3,2022-2026,https://github.com/anvithakur,"Manufacturing,Automation","CAM,CNC,Industry 4.0"
-Laksh Yadav,laksh35,laksh.yadav@kgkite.ac.in,Student@123,9876543244,2022015,REG2022015,Civil,3,2022-2026,https://github.com/lakshyadav,"Construction Management,Planning","Primavera,MS Project,Cost Estimation"
-Samaira Rawat,samaira36,samaira.rawat@kgkite.ac.in,Student@123,9876543245,2023011,REG2023011,Electrical,2,2023-2027,https://github.com/samairarawat,"Control Systems,Robotics","MATLAB,PLC Programming,LabVIEW"
-Rudra Pandya,rudra37,rudra.pandya@kgkite.ac.in,Student@123,9876543246,2023012,REG2023012,Mechanical,2,2023-2027,https://github.com/rudrapandya,"Thermal Engineering,CFD","ANSYS Fluent,Heat Transfer,Thermodynamics"
-Tara Tripathi,tara38,tara.tripathi@kgkite.ac.in,Student@123,9876543247,2023013,REG2023013,Civil,2,2023-2027,https://github.com/taratripathi,"Geotechnical,Foundation","Geo5,Plaxis,Soil Mechanics"
-Advika Bajaj,advika39,advika.bajaj@kgkite.ac.in,Student@123,9876543248,2023014,REG2023014,Electrical,2,2023-2027,https://github.com/advikabajaj,"Power Electronics,EV","PSIM,Electric Vehicles,Battery Tech"
-Raghav Chopra,raghav40,raghav.chopra@kgkite.ac.in,Student@123,9876543249,2023015,REG2023015,Mechanical,2,2023-2027,https://github.com/raghavchopra,"Automobile,Design","CATIA,Vehicle Dynamics,Automotive"
-Shanaya Kohli,shanaya41,shanaya.kohli@kgkite.ac.in,Student@123,9876543250,2024011,REG2024011,Civil,1,2024-2028,https://github.com/shanayakohli,"Environmental,Water Resources","HEC-RAS,Water Treatment,Hydrology"
-Veer Arora,veer42,veer.arora@kgkite.ac.in,Student@123,9876543251,2024012,REG2024012,Electrical,1,2024-2028,https://github.com/veerarora,"Smart Grid,IoT","Arduino,Sensors,Energy Management"
-Ira Bakshi,ira43,ira.bakshi@kgkite.ac.in,Student@123,9876543252,2024013,REG2024013,Mechanical,1,2024-2028,https://github.com/irabakshi,"Aerospace,Drones","Aerodynamics,MATLAB,Drone Design"
-Ahaan Sethi,ahaan44,ahaan.sethi@kgkite.ac.in,Student@123,9876543253,2024014,REG2024014,Civil,1,2024-2028,https://github.com/ahaansethi,"Transportation,Smart Cities","GIS,Traffic Engineering,Urban Planning"
-Myra Vyas,myra45,myra.vyas@kgkite.ac.in,Student@123,9876543254,2024015,REG2024015,Electrical,1,2024-2028,https://github.com/myravyas,"Embedded Systems,Microcontrollers","AVR,ARM,STM32"
-Pranav Shukla,pranav46,pranav.shukla@kgkite.ac.in,Student@123,9876543255,2022016,REG2022016,Computer Science,3,2022-2026,https://github.com/pranavshukla,"Distributed Systems,Cloud","Go,Kubernetes,gRPC"
-Anaya Rastogi,anaya47,anaya.rastogi@kgkite.ac.in,Student@123,9876543256,2022017,REG2022017,Information Technology,3,2022-2026,https://github.com/anayarastogi,"DevOps,CI/CD","Jenkins,GitLab,Terraform"
-Shivansh Kaul,shivansh48,shivansh.kaul@kgkite.ac.in,Student@123,9876543257,2022018,REG2022018,Computer Science,3,2022-2026,https://github.com/shivanshkaul,"Network Programming,Protocols","C,Socket Programming,TCP/IP"
-Amaira Datta,amaira49,amaira.datta@kgkite.ac.in,Student@123,9876543258,2022019,REG2022019,Electronics,3,2022-2026,https://github.com/amairadatta,"Communication Systems,5G","Wireless,RF Design,Antenna"
-Darsh Chawla,darsh50,darsh.chawla@kgkite.ac.in,Student@123,9876543259,2022020,REG2022020,Information Technology,3,2022-2026,https://github.com/darshchawla,"Enterprise Software,SAP","ERP,Java,Enterprise Architecture"
+name,collegeEmail,rollNumber,department,yearOfStudy,batch,linkedIn,github
+Arjun Patel,arjun.patel@kgkite.ac.in,2201CS101,Computer Science,2,2022-2026,https://linkedin.com/in/arjunpatel,https://github.com/arjunpatel
+Rohan Reddy,rohan.reddy@kgkite.ac.in,2201CS102,Computer Science,2,2022-2026,https://linkedin.com/in/rohanreddy,https://github.com/rohanreddy
+Isha Gupta,isha.gupta@kgkite.ac.in,2201IT103,Information Technology,2,2022-2026,https://linkedin.com/in/ishagupta,https://github.com/ishagupta
+Vihaan Mehta,vihaan.mehta@kgkite.ac.in,2201EC104,Electronics,2,2022-2026,https://linkedin.com/in/vihaanmehta,https://github.com/vihaanmehta
+Saanvi Joshi,saanvi.joshi@kgkite.ac.in,2201CS105,Computer Science,2,2022-2026,https://linkedin.com/in/saanvijoshi,https://github.com/saanvijoshi
+Aditya Verma,aditya.verma@kgkite.ac.in,2202CS106,Computer Science,3,2021-2025,https://linkedin.com/in/adityaverma,https://github.com/adityaverma
+Kavya Nair,kavya.nair@kgkite.ac.in,2202IT107,Information Technology,3,2021-2025,https://linkedin.com/in/kavyanair,https://github.com/kavyanair
+Ayaan Khan,ayaan.khan@kgkite.ac.in,2202CS108,Computer Science,3,2021-2025,https://linkedin.com/in/ayaankhan,https://github.com/ayaankhan
+Mira Desai,mira.desai@kgkite.ac.in,2201EC109,Electronics,2,2022-2026,https://linkedin.com/in/miradesai,https://github.com/miradesai
+Reyansh Pillai,reyansh.pillai@kgkite.ac.in,2203CS110,Computer Science,4,2020-2024,https://linkedin.com/in/reyanshpillai,https://github.com/reyanshpillai
+Ananya Sharma,ananya.sharma@kgkite.ac.in,2203IT111,Information Technology,4,2020-2024,https://linkedin.com/in/ananyasharma,https://github.com/ananyasharma
+Kabir Singh,kabir.singh@kgkite.ac.in,2201CS112,Computer Science,2,2022-2026,https://linkedin.com/in/kabirsingh,https://github.com/kabirsingh
+Diya Malhotra,diya.malhotra@kgkite.ac.in,2202CS113,Computer Science,3,2021-2025,https://linkedin.com/in/diyamalhotra,https://github.com/diyamalhotra
+Vivaan Kumar,vivaan.kumar@kgkite.ac.in,2201EC114,Electronics,2,2022-2026,https://linkedin.com/in/vivaankumar,https://github.com/vivaankumar
+Kiara Bansal,kiara.bansal@kgkite.ac.in,2202IT115,Information Technology,3,2021-2025,https://linkedin.com/in/kiarabansal,https://github.com/kiarabansal
+Aarav Kumar,aarav.kumar@kgkite.ac.in,2201CS116,Computer Science,2,2022-2026,https://linkedin.com/in/aaravkumar,https://github.com/aaravkumar
+Priya Sharma,priya.sharma@kgkite.ac.in,2203CS117,Computer Science,4,2020-2024,https://linkedin.com/in/priyasharma,https://github.com/priyasharma
+Dhruv Agarwal,dhruv.agarwal@kgkite.ac.in,2201CS118,Computer Science,2,2022-2026,https://linkedin.com/in/dhruvagarwal,https://github.com/dhruvagarwal
+Riya Chatterjee,riya.chatterjee@kgkite.ac.in,2202IT119,Information Technology,3,2021-2025,https://linkedin.com/in/riyachatterjee,https://github.com/riyachatterjee
+Siddharth Jain,siddharth.jain@kgkite.ac.in,2203EC120,Electronics,4,2020-2024,https://linkedin.com/in/siddharthjain,https://github.com/siddharthjain
+Ishaan Bhat,ishaan.bhat@kgkite.ac.in,2201CS121,Computer Science,2,2022-2026,https://linkedin.com/in/ishaanbhat,https://github.com/ishaanbhat
+Navya Kulkarni,navya.kulkarni@kgkite.ac.in,2202CS122,Computer Science,3,2021-2025,https://linkedin.com/in/navyakulkarni,https://github.com/navyakulkarni
+Atharv Rao,atharv.rao@kgkite.ac.in,2201IT123,Information Technology,2,2022-2026,https://linkedin.com/in/atharvrao,https://github.com/atharvrao
+Myra Kapoor,myra.kapoor@kgkite.ac.in,2203CS124,Computer Science,4,2020-2024,https://linkedin.com/in/myrakapoor,https://github.com/myrakapoor
+Shaurya Mishra,shaurya.mishra@kgkite.ac.in,2201CS125,Computer Science,2,2022-2026,https://linkedin.com/in/shauryamishra,https://github.com/shauryamishra
+Shanaya Singh,shanaya.singh@kgkite.ac.in,2202EC126,Electronics,3,2021-2025,https://linkedin.com/in/shanayasingh,https://github.com/shanayasingh
+Veer Khanna,veer.khanna@kgkite.ac.in,2201IT127,Information Technology,2,2022-2026,https://linkedin.com/in/veerkhanna,https://github.com/veerkhanna
+Aadhya Menon,aadhya.menon@kgkite.ac.in,2203CS128,Computer Science,4,2020-2024,https://linkedin.com/in/aadhyamenon,https://github.com/aadhyamenon
+Rudra Pandey,rudra.pandey@kgkite.ac.in,2202CS129,Computer Science,3,2021-2025,https://linkedin.com/in/rudrapandey,https://github.com/rudrapandey
+Pihu Ghosh,pihu.ghosh@kgkite.ac.in,2201CS130,Computer Science,2,2022-2026,https://linkedin.com/in/pihughosh,https://github.com/pihughosh
+Laksh Yadav,laksh.yadav@kgkite.ac.in,2202IT131,Information Technology,3,2021-2025,https://linkedin.com/in/lakshyadav,https://github.com/lakshyadav
+Samaira Rawat,samaira.rawat@kgkite.ac.in,2203EC132,Electronics,4,2020-2024,https://linkedin.com/in/samairarawat,https://github.com/samairarawat
+Ahaan Sethi,ahaan.sethi@kgkite.ac.in,2201CS133,Computer Science,2,2022-2026,https://linkedin.com/in/ahaansethi,https://github.com/ahaansethi
+Tara Tripathi,tara.tripathi@kgkite.ac.in,2202CS134,Computer Science,3,2021-2025,https://linkedin.com/in/taratripathi,https://github.com/taratripathi
+Krish Bhatt,krish.bhatt@kgkite.ac.in,2201IT135,Information Technology,2,2022-2026,https://linkedin.com/in/krishbhatt,https://github.com/krishbhatt
+Advika Bajaj,advika.bajaj@kgkite.ac.in,2203CS136,Computer Science,4,2020-2024,https://linkedin.com/in/advikabajaj,https://github.com/advikabajaj
+Raghav Chopra,raghav.chopra@kgkite.ac.in,2202EC137,Electronics,3,2021-2025,https://linkedin.com/in/raghavchopra,https://github.com/raghavchopra
+Ira Bakshi,ira.bakshi@kgkite.ac.in,2201CS138,Computer Science,2,2022-2026,https://linkedin.com/in/irabakshi,https://github.com/irabakshi
+Yash Tiwari,yash.tiwari@kgkite.ac.in,2203IT139,Information Technology,4,2020-2024,https://linkedin.com/in/yashtiwari,https://github.com/yashtiwari
+Prisha Dubey,prisha.dubey@kgkite.ac.in,2202CS140,Computer Science,3,2021-2025,https://linkedin.com/in/prishadubey,https://github.com/prishadubey
+Darsh Chawla,darsh.chawla@kgkite.ac.in,2201CS141,Computer Science,2,2022-2026,https://linkedin.com/in/darshchawla,https://github.com/darshchawla
+Anvi Thakur,anvi.thakur@kgkite.ac.in,2202IT142,Information Technology,3,2021-2025,https://linkedin.com/in/anvithakur,https://github.com/anvithakur
+Shivansh Kaul,shivansh.kaul@kgkite.ac.in,2203CS143,Computer Science,4,2020-2024,https://linkedin.com/in/shivanshkaul,https://github.com/shivanshkaul
+Amaira Datta,amaira.datta@kgkite.ac.in,2201EC144,Electronics,2,2022-2026,https://linkedin.com/in/amairadatta,https://github.com/amairadatta
+Pranav Shukla,pranav.shukla@kgkite.ac.in,2202CS145,Computer Science,3,2021-2025,https://linkedin.com/in/pranavshukla,https://github.com/pranavshukla
+Anaya Rastogi,anaya.rastogi@kgkite.ac.in,2203IT146,Information Technology,4,2020-2024,https://linkedin.com/in/anayarastogi,https://github.com/anayarastogi
+Siya Saxena,siya.saxena@kgkite.ac.in,2201CS147,Computer Science,2,2022-2026,https://linkedin.com/in/siyasaxena,https://github.com/siyasaxena
+Kabir Malhotra,kabir.malhotra@kgkite.ac.in,2202CS148,Computer Science,3,2021-2025,https://linkedin.com/in/kabirmalhotra,https://github.com/kabirmalhotra
+Anika Banerjee,anika.banerjee@kgkite.ac.in,2203EC149,Electronics,4,2020-2024,https://linkedin.com/in/anikabanerjee,https://github.com/anikabanerjee
+Dhruv Kumar,dhruv.kumar@kgkite.ac.in,2201IT150,Information Technology,2,2022-2026,https://linkedin.com/in/dhruvkumar,https://github.com/dhruvkumar

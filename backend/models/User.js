@@ -12,6 +12,7 @@ const userSchema = new mongoose.Schema({
     required: [true, 'Please provide college email'],
     unique: true,
     lowercase: true,
+    trim: true,
     match: [/^\S+@\S+\.\S+$/, 'Please provide a valid email'],
     validate: {
       validator: function (email) {
@@ -19,9 +20,22 @@ const userSchema = new mongoose.Schema({
         if (this.role === 'student') {
           return email.toLowerCase().endsWith('@kgkite.ac.in');
         }
+        // Alumni must use @kgkite.alumni.ac.in or @kgkite.ac.in email
+        if (this.role === 'alumni') {
+          return email.toLowerCase().endsWith('@kgkite.alumni.ac.in') || email.toLowerCase().endsWith('@kgkite.ac.in');
+        }
         return true;
       },
-      message: 'Students must use @kgkite.ac.in email address'
+      message: function (props) {
+        // 'this' might not be available in some contexts, using props or falling back
+        if (this && this.role === 'student') {
+          return 'Students must use @kgkite.ac.in email address';
+        }
+        if (this && this.role === 'alumni') {
+          return 'Alumni must use @kgkite.alumni.ac.in or @kgkite.ac.in email address';
+        }
+        return 'Invalid email domain for the selected role';
+      }
     }
   },
   password: {
@@ -133,6 +147,10 @@ const userSchema = new mongoose.Schema({
     default: true
   },
   isVerified: {
+    type: Boolean,
+    default: false
+  },
+  passwordInitialized: {
     type: Boolean,
     default: false
   },

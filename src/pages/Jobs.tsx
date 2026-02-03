@@ -50,7 +50,7 @@ const Jobs = () => {
     fetchJobs();
   }, []);
 
-  const canPost = user?.role === 'alumni' || user?.role === 'admin';
+  const canPost = user?.role === 'admin' || user?.role === 'alumni';
 
   const handleAddJob = async () => {
     if (!formData.title || !formData.company || !formData.companyWebsiteURL || !formData.description) {
@@ -71,8 +71,8 @@ const Jobs = () => {
         body: JSON.stringify({
           ...formData,
           salary: {
-            min: parseInt(formData.salary.split('-')[0]) || 0,
-            max: parseInt(formData.salary.split('-')[1]) || 0
+            min: parseInt(formData.salary.split('-')[0]) || parseInt(formData.salary) || 0,
+            max: parseInt(formData.salary.split('-')[1]) || parseInt(formData.salary) || 0
           }
         })
       });
@@ -92,7 +92,7 @@ const Jobs = () => {
         setShowModal(false);
         fetchJobs();
       } else {
-        toast.error(data.message || 'Failed to post job', { id: tid });
+        toast.error(data.error || data.message || 'Failed to post job', { id: tid });
       }
     } catch (error) {
       toast.error('Connection error', { id: tid });
@@ -191,7 +191,7 @@ const Jobs = () => {
                     </button>
                     {openDropdown === job._id && (
                       <div className="absolute right-0 mt-2 w-56 bg-card border border-border rounded-2xl shadow-2xl z-50 py-3 animate-fade-in">
-                        {(user?.role === 'admin' || job.postedBy?._id === user?.id || job.postedBy === user?.id) && (
+                        {(user?.role === 'admin' || (user?.role === 'alumni' && job.postedBy?._id === user?.id)) && (
                           <button
                             onClick={() => handleDelete(job._id)}
                             className="w-full text-left px-5 py-3 text-[10px] font-black text-destructive hover:bg-destructive/10 flex items-center gap-3 uppercase tracking-widest"

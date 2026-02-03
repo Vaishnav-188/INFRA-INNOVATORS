@@ -22,7 +22,7 @@ const jobSchema = new mongoose.Schema({
     },
     location: {
         type: String,
-        required: true
+        required: [true, 'Please provide job location']
     },
     jobType: {
         type: String,
@@ -40,9 +40,7 @@ const jobSchema = new mongoose.Schema({
     experienceRequired: {
         type: String
     },
-    skills: [{
-        type: String
-    }],
+    skills: [String],
     postedBy: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',

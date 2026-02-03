@@ -20,13 +20,13 @@ router.get('/:id', protect, getJobById);
 // Apply for job - Students only (redirects to company website)
 router.get('/:id/apply', protect, authorize('student'), applyForJob);
 
-// Create job - Alumni and Admin only
-router.post('/', protect, authorize('alumni', 'admin'), createJob);
+// Create job - Admin or Alumni
+router.post('/', protect, authorize('admin', 'alumni'), createJob);
 
-// Update job status - Alumni (own jobs) and Admin
-router.patch('/:id/status', protect, authorize('alumni', 'admin'), updateJobStatus);
+// Update job status - Admin or Alumni (alumni check in controller)
+router.patch('/:id/status', protect, authorize('admin', 'alumni'), updateJobStatus);
 
-// Delete job - Alumni (own jobs) and Admin
-router.delete('/:id', protect, authorize('alumni', 'admin'), deleteJob);
+// Delete job - Admin or Alumni (alumni check in controller)
+router.delete('/:id', protect, authorize('admin', 'alumni'), deleteJob);
 
 export default router;

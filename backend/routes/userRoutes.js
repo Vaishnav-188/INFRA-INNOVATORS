@@ -1,5 +1,5 @@
 import express from 'express';
-import { protect } from '../middleware/auth.js';
+import { protect, adminOnly } from '../middleware/auth.js';
 import {
     getAllUsers,
     getUserStats,
@@ -9,6 +9,7 @@ import {
     verifyUser,
     rejectUser,
     requestAlumniStatus,
+    convertToAlumni,
     deleteUsersByRole
 } from '../controllers/userController.js';
 
@@ -21,12 +22,13 @@ router.get('/top-alumni', getTopAlumni);
 router.post('/request-alumni', protect, requestAlumniStatus);
 
 // Protected routes (admin only)
-router.get('/', protect, getAllUsers);
-router.get('/stats', protect, getUserStats);
-router.get('/pending-verifications', protect, getPendingVerifications);
-router.put('/verify/:id', protect, verifyUser);
-router.delete('/reject/:id', protect, rejectUser);
-router.delete('/bulk-delete/:role', protect, deleteUsersByRole);
+router.get('/', protect, adminOnly, getAllUsers);
+router.get('/stats', protect, adminOnly, getUserStats);
+router.get('/pending-verifications', protect, adminOnly, getPendingVerifications);
+router.put('/verify/:id', protect, adminOnly, verifyUser);
+router.delete('/reject/:id', protect, adminOnly, rejectUser);
+router.put('/convert-to-alumni/:userId', protect, adminOnly, convertToAlumni);
+router.delete('/bulk-delete/:role', protect, adminOnly, deleteUsersByRole);
 router.get('/:id', protect, getUserById);
 
 export default router;

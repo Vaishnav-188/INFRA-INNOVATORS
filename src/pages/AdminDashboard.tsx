@@ -5,15 +5,16 @@ import GlassCard from '@/components/ui/GlassCard';
 import { useAuth } from '@/context/AuthContext';
 import { usePageTransition } from '@/hooks/useGSAP';
 import { toast } from 'sonner';
-import { Plus, Info, Bell, CheckCircle, Trash2, Edit3, MoreHorizontal, Bookmark } from 'lucide-react';
+import { Plus, Info, Bell, CheckCircle, Search } from 'lucide-react';
 
-type TabType = 'verifications' | 'events' | 'donations' | 'csv_upload' | 'settings';
+type TabType = 'verifications' | 'events' | 'donations' | 'users' | 'csv_upload' | 'settings';
 
 interface Verification {
   id: string;
   name: string;
   email: string;
   rollNumber: string;
+  department: string;
   yearOfStudy: string;
   linkedinProfile: string;
   githubProfile?: string;
@@ -43,6 +44,8 @@ const AdminDashboard = () => {
   const [settings, setSettings] = useState<any>(null);
   const [stats, setStats] = useState<any>(null);
   const [lastImportResults, setLastImportResults] = useState<any>(null);
+  const [allUsers, setAllUsers] = useState<any[]>([]);
+  const [userSearch, setUserSearch] = useState('');
 
   // Fetch stats separately
   const fetchStats = async () => {
@@ -58,6 +61,53 @@ const AdminDashboard = () => {
       }
     } catch (error) {
       console.error('Error fetching stats:', error);
+    }
+  };
+
+  const fetchAllUsers = async () => {
+    const token = localStorage.getItem('alumni_hub_token');
+    if (!token) return;
+    try {
+      const response = await fetch('/api/users', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await response.json();
+      if (data.success) {
+        setAllUsers(data.users);
+      }
+    } catch (error) {
+      console.error('Error fetching users:', error);
+    }
+  };
+
+  const handleConvertToAlumni = async (userId: string) => {
+    const token = localStorage.getItem('alumni_hub_token');
+    if (!token) return;
+
+    try {
+      const response = await fetch(`/api/users/convert-to-alumni/${userId}`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          graduationYear: new Date().getFullYear(),
+          currentCompany: 'Unknown',
+          isPlaced: false
+        })
+      });
+      const data = await response.json();
+      if (data.success) {
+        toast.success(data.message);
+        fetchAllUsers();
+        fetchStats();
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      console.error('Error converting student:', error);
+      toast.error('Failed to convert student');
     }
   };
 
@@ -186,6 +236,7 @@ const AdminDashboard = () => {
             name: v.name,
             email: v.collegeEmail,
             rollNumber: v.rollNumber || 'N/A',
+            department: v.department || 'N/A',
             yearOfStudy: v.yearOfStudy || 'N/A',
             linkedinProfile: v.linkedIn || '#',
             githubProfile: v.github || '#',
@@ -250,6 +301,10 @@ const AdminDashboard = () => {
   useEffect(() => {
     fetchDonations();
   }, [tab === 'donations']);
+
+  useEffect(() => {
+    if (tab === 'users') fetchAllUsers();
+  }, [tab]);
 
   const handleApproveVerification = async (id: string) => {
     const token = localStorage.getItem('alumni_hub_token');
@@ -380,8 +435,9 @@ const AdminDashboard = () => {
 
   const tabs: { value: TabType; label: string }[] = [
     { value: 'verifications', label: 'Verifications' },
-    { value: 'events', label: 'Event Approvals' },
+    { value: 'events', label: 'Events' },
     { value: 'donations', label: 'Donations' },
+    { value: 'users', label: 'Manage Users' },
     { value: 'csv_upload', label: 'CSV' },
     { value: 'settings', label: 'Settings' },
   ];
@@ -475,42 +531,46 @@ const AdminDashboard = () => {
           <div className="grid grid-cols-1 gap-6 animate-fade-in">
             {verifications.map((v) => (
               <GlassCard key={v.id} variant="default" className="p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-                <div>
-                  <div className="flex items-center gap-2 mb-1">
-                    <h3 className="font-black text-xl text-foreground">{v.name}</h3>
-                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase ${v.role === 'admin' ? 'bg-destructive/10 text-destructive' : 'bg-primary/10 text-primary'
-                      }`}>
-                      {v.role}
-                    </span>
+                <div className="flex items-center gap-4">
+                  <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-xl font-bold ${v.role === 'admin' ? 'bg-primary/20 text-primary' :
+                    v.role === 'alumni' ? 'bg-success/20 text-success' : 'bg-muted text-muted-foreground'
+                    }`}>
+                    {v.name.charAt(0)}
                   </div>
-                  <p className="text-muted-foreground text-sm font-medium">
-                    {v.email}
-                  </p>
-                  {v.role === 'student' && (
-                    <p className="text-muted-foreground text-xs font-bold mt-1 uppercase tracking-tight">
-                      Roll No: {v.rollNumber} • Year: {v.yearOfStudy}
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                      <h3 className="font-black text-xl text-foreground uppercase tracking-tight leading-none">{v.name}</h3>
+                      <span className={`text-[10px] px-3 py-1 rounded-full font-black uppercase tracking-widest ${v.role === 'admin' ? 'bg-primary text-primary-foreground animate-pulse' :
+                        v.role === 'alumni' ? 'bg-success text-success-foreground' : 'bg-muted text-muted-foreground'
+                        }`}>
+                        {v.role}
+                      </span>
+                    </div>
+                    <p className="text-sm text-muted-foreground font-medium mt-1">{v.email || 'No email'}</p>
+                    <p className="text-[10px] text-muted-foreground/60 font-black uppercase tracking-widest mt-1">
+                      {v.role === 'student' ? `${v.department || 'N/A'} • ${v.rollNumber}` : v.role === 'alumni' ? `ALUMNI • Grad ${v.yearOfStudy}` : 'ADMINISTRATOR ACCESS REQUEST'}
                     </p>
-                  )}
-                  <div className="flex gap-4 items-center">
+                  </div>
+                </div>
+                <div className="flex gap-4 items-center">
+                  <a
+                    href={v.linkedinProfile}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-primary text-xs font-bold mt-2 inline-block hover:underline"
+                  >
+                    LinkedIn Profile →
+                  </a>
+                  {v.githubProfile && v.githubProfile !== '#' && (
                     <a
-                      href={v.linkedinProfile}
+                      href={v.githubProfile}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-primary text-xs font-bold mt-2 inline-block hover:underline"
+                      className="text-foreground text-xs font-bold mt-2 inline-block hover:underline"
                     >
-                      LinkedIn Profile →
+                      GitHub Profile →
                     </a>
-                    {v.githubProfile && v.githubProfile !== '#' && (
-                      <a
-                        href={v.githubProfile}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-foreground text-xs font-bold mt-2 inline-block hover:underline"
-                      >
-                        GitHub Profile →
-                      </a>
-                    )}
-                  </div>
+                  )}
                 </div>
                 <div className="flex gap-3">
                   <button
@@ -618,6 +678,82 @@ const AdminDashboard = () => {
                 No donations recorded yet
               </p>
             )}
+          </div>
+        )}
+
+        {/* Users Tab */}
+        {tab === 'users' && (
+          <div className="space-y-6 animate-fade-in">
+            {/* Search Input */}
+            <div className="relative">
+              <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-muted-foreground" size={20} />
+              <input
+                type="text"
+                placeholder="Search users by name or email..."
+                value={userSearch}
+                onChange={(e) => setUserSearch(e.target.value)}
+                className="w-full bg-card/60 backdrop-blur-xl border border-border h-16 pl-14 pr-6 rounded-[2rem] font-bold text-sm outline-none focus:ring-2 ring-primary/20 transition-all shadow-lg"
+              />
+            </div>
+
+            <div className="grid grid-cols-1 gap-6">
+              {allUsers
+                .filter((u) =>
+                  u.name.toLowerCase().includes(userSearch.toLowerCase()) ||
+                  u.collegeEmail.toLowerCase().includes(userSearch.toLowerCase())
+                )
+                .map((u) => (
+                  <GlassCard key={u._id} variant="default" className="p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+                    <div className="flex items-center gap-4">
+                      <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-xl font-bold ${u.role === 'admin' ? 'bg-primary/20 text-primary' :
+                        u.role === 'alumni' ? 'bg-success/20 text-success' : 'bg-muted text-muted-foreground'
+                        }`}>
+                        {u.name.charAt(0)}
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <h3 className="font-black text-xl text-foreground">{u.name}</h3>
+                          <span className={`text-[10px] px-3 py-1 rounded-full font-black uppercase tracking-widest ${u.role === 'admin' ? 'bg-primary text-primary-foreground' :
+                            u.role === 'alumni' ? 'bg-success text-success-foreground' : 'bg-muted text-muted-foreground'
+                            }`}>
+                            {u.role}
+                          </span>
+                        </div>
+                        <p className="text-sm text-muted-foreground font-medium">{u.collegeEmail}</p>
+                        <p className="text-[10px] text-muted-foreground font-black uppercase tracking-widest mt-1">
+                          {u.department || 'No Dept'} {u.rollNumber ? `• ${u.rollNumber}` : ''}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex gap-4 w-full md:w-auto">
+                      {u.role === 'student' && (
+                        <button
+                          onClick={() => handleConvertToAlumni(u._id)}
+                          className="flex-1 md:flex-none bg-success text-success-foreground px-6 py-3 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-success/90 transition shadow-lg shadow-success/10"
+                        >
+                          UPGRADE TO ALUMNI
+                        </button>
+                      )}
+                      <button
+                        onClick={() => handleDeleteUser(u._id, u.name)}
+                        className="flex-1 md:flex-none text-destructive hover:bg-destructive/10 px-4 py-3 rounded-xl text-[10px] font-black uppercase transition border border-destructive/20"
+                      >
+                        DELETE ACCOUNT
+                      </button>
+                    </div>
+                  </GlassCard>
+                ))}
+              {allUsers.filter(u =>
+                u.name.toLowerCase().includes(userSearch.toLowerCase()) ||
+                u.collegeEmail.toLowerCase().includes(userSearch.toLowerCase())
+              ).length === 0 && (
+                  <div className="py-24 text-center glass-card rounded-[3rem] border border-dashed border-border mt-6">
+                    <p className="text-muted-foreground font-black uppercase tracking-[0.2em] text-sm">
+                      {allUsers.length === 0 ? 'No users found' : 'No matching users found'}
+                    </p>
+                  </div>
+                )}
+            </div>
           </div>
         )}
 
@@ -1192,7 +1328,7 @@ const AdminDashboard = () => {
           )
         )}
       </div>
-    </MainLayout>
+    </MainLayout >
   );
 };
 

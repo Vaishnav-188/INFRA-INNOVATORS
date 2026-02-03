@@ -115,7 +115,7 @@ export const getPendingVerifications = async (req, res) => {
                 { isVerified: false },
                 { isVerified: { $exists: false } }
             ]
-        }).select('name rollNumber yearOfStudy linkedIn collegeEmail github role batch');
+        }).select('name rollNumber yearOfStudy linkedIn collegeEmail github role batch department');
 
         console.log(`[DEBUG] Found ${pending.length} pending verifications`);
         if (pending.length > 0) {
@@ -207,6 +207,66 @@ export const requestAlumniStatus = async (req, res) => {
         res.status(500).json({ error: 'Server error' });
     }
 };
+
+// Convert student to alumni (Admin only)
+export const convertToAlumni = async (req, res) => {
+    try {
+        const { userId } = req.params;
+        const alumniData = req.body;
+
+        const user = await User.findById(userId);
+
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: 'User not found'
+            });
+        }
+
+        if (user.role !== 'student') {
+            return res.status(400).json({
+                success: false,
+                message: 'Only students can be converted to alumni'
+            });
+        }
+
+        // Update role and add alumni-specific fields
+        user.role = 'alumni';
+
+        // Preserve existing data, add new alumni fields
+        if (alumniData.graduationYear) user.graduationYear = alumniData.graduationYear;
+        if (alumniData.currentCompany) user.currentCompany = alumniData.currentCompany;
+        if (alumniData.jobRole) user.jobRole = alumniData.jobRole;
+        if (alumniData.location) user.location = alumniData.location;
+        if (alumniData.salary) user.salary = alumniData.salary;
+        if (alumniData.isPlaced !== undefined) user.isPlaced = alumniData.isPlaced;
+        if (alumniData.domain) user.domain = alumniData.domain;
+        if (alumniData.skills) user.skills = alumniData.skills;
+        if (alumniData.bio) user.bio = alumniData.bio;
+
+        await user.save();
+
+        console.log(`[CONVERT] Student ${user.collegeEmail} converted to Alumni`);
+
+        res.json({
+            success: true,
+            message: 'Student successfully converted to alumni',
+            user: {
+                _id: user._id,
+                name: user.name,
+                collegeEmail: user.collegeEmail,
+                role: user.role
+            }
+        });
+    } catch (error) {
+        console.error('Error converting to alumni:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Server error during conversion'
+        });
+    }
+};
+
 // Bulk delete users by role
 export const deleteUsersByRole = async (req, res) => {
     try {
