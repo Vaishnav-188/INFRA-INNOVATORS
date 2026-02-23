@@ -1,0 +1,10 @@
+fastapi
+uvicorn
+pydantic
+pymongo
+agno
+ollama
+openai
+bcrypt
+python-dotenv
+motor
