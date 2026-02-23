@@ -216,16 +216,10 @@ def generate_domain_roadmap(req: DomainRoadmapRequest):
     import re
 
     if quiz_text:
-        
-        q_pattern = re.compile(
-            r'Q(\d+)[\.:][\s\n]+(.+?)(?=\nQ\d+[\.:]\s|\Z)',
-            re.DOTALL
-        )
-
-       
+        # Split blocks by Q1., Q2. pattern
         raw_blocks = re.split(r'\n?(?:Q(\d+)[\.:])\s*', quiz_text)
-
-       
+        
+        i = 1  # Start from index 1 because index 0 is the text before the first Q
         while i + 1 < len(raw_blocks):
             q_num_str = raw_blocks[i]      # e.g. "1"
             q_body    = raw_blocks[i + 1]  # everything until next Q

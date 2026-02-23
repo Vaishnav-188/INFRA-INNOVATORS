@@ -1,16 +1,10 @@
-requirredd package
-pip install ollama
-pip install agno
-pip install openai
-
-
-
-Buiding private Chatbots
-offline Chatbots
-data personal 
-
-AGENTS=Goal,Rules 
-Goal(Personal diet planner)
-Rules(What kind of answer they give like weight,height,veg non etc few info)
-
-if we create agent means we use agno 
+fastapi
+uvicorn
+pydantic
+pymongo
+agno
+ollama
+openai
+bcrypt
+python-dotenv
+motor
