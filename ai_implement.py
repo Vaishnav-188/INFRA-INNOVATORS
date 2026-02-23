@@ -22,7 +22,6 @@ Your Responsibilities:
 1. Identify skill gaps between current skills and the career goal.
 2. Create a 6-week roadmap.
 3. Each week must contain 3 to 5 practical micro-tasks.
-
 Rules:
 - Tasks must be Measurable, Actionable, and Real-world focused.
 - Avoid generic advice — be specific to the student's profile.
@@ -37,14 +36,9 @@ Rules:
   - Task 1
   - Task 2
   ...
-
 - Keep total response under 400 words.
 - Be professional and career-focused.
 """
-
-
-
-# Shared Ollama model instane
 _model = Ollama(id="llama3.2:1b")
 
 
@@ -53,8 +47,6 @@ roadmap_agent = Agent(
     model=_model,
     instructions=SYSTEM_PROMPT,
 )
-
-# ── General chat agent ────────────────────────────────────────────────────────
 CHAT_PROMPT = """
 You are the Alumni Hub AI Assistant embedded in a student-alumni management platform.
 
@@ -71,13 +63,9 @@ chat_agent = Agent(
     model=_model,
     instructions=CHAT_PROMPT,
 )
-
-# ── Domain Roadmap + Quiz agent ───────────────────────────────────────────────
 DOMAIN_ROADMAP_PROMPT = """
 You are a Career Domain Expert inside an Alumni Mentorship Platform.
-
 When given a domain (e.g. Data Science, Web Development, Cybersecurity, etc.) you must produce:
-
 PART 1 — 6-WEEK ROADMAP
 - Exactly 6 weeks
 - Each week: 3–5 specific, actionable tasks tailored to the domain
@@ -87,7 +75,6 @@ PART 1 — 6-WEEK ROADMAP
   - Task 1
   - Task 2
   ...
-
 PART 2 — SKILL ASSESSMENT QUIZ
 - Exactly 5 multiple-choice questions (MCQ) testing fundamental knowledge of the domain
 - Each question must have exactly 4 options labeled A), B), C), D)
@@ -100,7 +87,6 @@ PART 2 — SKILL ASSESSMENT QUIZ
   C) ...
   D) ...
   ANSWER: B
-
 Rules:
 - Be domain-specific. Never give generic advice.
 - Keep the roadmap under 350 words.
@@ -115,10 +101,7 @@ domain_roadmap_agent = Agent(
 )
 
 
-# =============================================================================
-#  SECTION 3 — ROADMAP GENERATION FUNCTION
-#  Builds the personalised prompt and runs the agent.
-# =============================================================================
+
 
 def generate_roadmap(
     github_summary: str,
