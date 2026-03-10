@@ -5,6 +5,7 @@ import { useHeroReveal, useScrollReveal, useStaggerReveal } from '@/hooks/useGSA
 import { useAuth } from '@/context/AuthContext';
 import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
+import { MapPin } from 'lucide-react';
 
 // Success stories data
 const successStories = [
@@ -222,6 +223,8 @@ const Index = () => {
             ))}
           </div>
         </section>
+
+
 
         {/* Student Verification Section - Only for Students */}
         {user?.role === 'student' && (

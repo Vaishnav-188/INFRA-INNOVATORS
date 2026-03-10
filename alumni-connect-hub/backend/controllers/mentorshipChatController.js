@@ -175,9 +175,16 @@ export const getChatMessages = async (req, res) => {
             }
         );
 
+        const emailConfigured = !!(process.env.EMAIL_USER && process.env.EMAIL_PASS &&
+            process.env.EMAIL_USER !== 'your_gmail@gmail.com');
+        // Chat is unlocked if: email not configured (dev) OR email was sent
+        const chatUnlocked = !emailConfigured || !!mentorship.emailSentToStudent;
+
         res.status(200).json({
             success: true,
             count: messages.length,
+            chatUnlocked,
+            emailSentToStudent: !!mentorship.emailSentToStudent,
             messages
         });
     } catch (error) {
@@ -222,7 +229,18 @@ export const sendChatMessage = async (req, res) => {
         if (mentorship.status !== 'accepted') {
             return res.status(400).json({
                 success: false,
-                message: 'Can only message in accepted relationships'
+                message: 'Messaging is only available in accepted mentorships'
+            });
+        }
+
+        // Gate: messaging is only open once the acceptance email has been sent
+        // In dev (email not configured), emailSentToStudent will be false — we allow it anyway
+        const emailConfigured = !!(process.env.EMAIL_USER && process.env.EMAIL_PASS &&
+            process.env.EMAIL_USER !== 'your_gmail@gmail.com');
+        if (emailConfigured && !mentorship.emailSentToStudent) {
+            return res.status(403).json({
+                success: false,
+                message: 'Messaging is locked until the acceptance confirmation email is sent to the student'
             });
         }
 

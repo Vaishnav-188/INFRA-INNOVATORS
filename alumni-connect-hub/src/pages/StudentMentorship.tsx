@@ -5,7 +5,7 @@ import GlassCard from '@/components/ui/GlassCard';
 import { useAuth } from '@/context/AuthContext';
 import { usePageTransition, useStaggerReveal } from '@/hooks/useGSAP';
 import {
-    MessageCircle, Users, CheckCircle, Clock, Briefcase, Building2, Mail
+    MessageCircle, Users, CheckCircle, Clock, Briefcase, Building2, Mail, Lock, Unlock
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -15,14 +15,15 @@ interface MentorshipRequest {
         _id: string;
         name: string;
         username: string;
-        email: string;
+        collegeEmail?: string;
         currentCompany?: string;
-        currentPosition?: string;
+        jobRole?: string;
         linkedIn?: string;
     };
     domain: string;
     message: string;
     status: 'pending' | 'accepted' | 'rejected' | 'completed' | 'cancelled';
+    emailSentToStudent: boolean;
     createdAt: string;
 }
 
@@ -242,7 +243,7 @@ const StudentMentorship = () => {
                                                 <div className="flex items-center gap-2">
                                                     <Building2 className="text-primary" size={14} />
                                                     <span className="text-sm font-medium text-foreground">
-                                                        {mentorship.alumni.currentPosition || 'Professional'} at {mentorship.alumni.currentCompany}
+                                                        {mentorship.alumni.jobRole || 'Professional'} at {mentorship.alumni.currentCompany}
                                                     </span>
                                                 </div>
                                             )}
@@ -252,28 +253,50 @@ const StudentMentorship = () => {
                                                     Domain: {mentorship.domain}
                                                 </span>
                                             </div>
-                                            {mentorship.alumni.email && (
+                                            {mentorship.alumni.collegeEmail && (
                                                 <div className="flex items-center gap-2">
                                                     <Mail className="text-muted-foreground" size={14} />
                                                     <span className="text-xs text-muted-foreground">
-                                                        {mentorship.alumni.email}
+                                                        {mentorship.alumni.collegeEmail}
                                                     </span>
                                                 </div>
                                             )}
                                         </div>
 
                                         {/* Actions */}
-                                        <Link to={`/mentorship-chat/${mentorship._id}`}>
-                                            <button className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-primary text-primary-foreground rounded-xl text-sm font-bold hover:bg-primary/90 transition-colors mb-2">
-                                                <MessageCircle size={16} />
-                                                Message Mentor
-                                            </button>
-                                        </Link>
-                                        <Link to={`/mentorship-chat/${mentorship._id}`} state={{ openTab: 'roadmap' }}>
-                                            <button className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-primary/20 to-purple-500/20 border border-primary/20 text-primary rounded-xl text-sm font-bold hover:from-primary/30 hover:to-purple-500/30 transition-all">
-                                                🗺️ View AI Roadmap & Quiz
-                                            </button>
-                                        </Link>
+                                        {mentorship.emailSentToStudent ? (
+                                            <>
+                                                <Link to={`/mentorship-chat/${mentorship._id}`}>
+                                                    <button className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-primary to-purple-600 text-primary-foreground rounded-xl text-sm font-bold hover:opacity-90 transition-all shadow-lg shadow-primary/20">
+                                                        <MessageCircle size={16} />
+                                                        Open Chat &amp; AI Roadmap
+                                                    </button>
+                                                </Link>
+                                                <p className="text-xs text-success text-center mt-2 flex items-center justify-center gap-1">
+                                                    <Unlock size={11} />
+                                                    Messaging enabled — confirmation email sent
+                                                </p>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <button
+                                                    disabled
+                                                    className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-muted text-muted-foreground rounded-xl text-sm font-bold cursor-not-allowed opacity-60"
+                                                >
+                                                    <Lock size={16} />
+                                                    Chat Locked
+                                                </button>
+                                                <p className="text-xs text-warning text-center mt-2 flex items-center justify-center gap-1">
+                                                    <Clock size={11} />
+                                                    Waiting for confirmation email to be dispatched
+                                                </p>
+                                                <Link to={`/mentorship-chat/${mentorship._id}`} className="block mt-2">
+                                                    <button className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-primary/10 text-primary rounded-xl text-xs font-bold hover:bg-primary/20 transition-colors">
+                                                        🗺️ View AI Roadmap (read-only)
+                                                    </button>
+                                                </Link>
+                                            </>
+                                        )}
 
                                         <p className="text-xs text-muted-foreground text-center mt-3">
                                             Connected {new Date(mentorship.createdAt).toLocaleDateString()}
@@ -333,7 +356,7 @@ const StudentMentorship = () => {
                                             <div className="flex items-center gap-2">
                                                 <Building2 className="text-muted-foreground" size={14} />
                                                 <span className="text-xs text-muted-foreground">
-                                                    {mentorship.alumni.currentPosition} at {mentorship.alumni.currentCompany}
+                                                    {mentorship.alumni.jobRole} at {mentorship.alumni.currentCompany}
                                                 </span>
                                             </div>
                                         )}

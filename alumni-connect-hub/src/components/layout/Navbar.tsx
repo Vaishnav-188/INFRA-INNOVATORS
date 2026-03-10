@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, Calendar, Briefcase } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useNavbarScroll } from '@/hooks/useGSAP';
 
@@ -22,7 +22,7 @@ const Navbar = () => {
       { path: '/connections', label: 'Connections' }
     ] : []),
     ...(isAuthenticated && user?.role === 'alumni' ? [
-      { path: '/connections', label: 'Connections' }
+      { path: '/connections', label: 'Mentorship' }
     ] : []),
   ];
 
@@ -62,19 +62,39 @@ const Navbar = () => {
         </Link>
 
         {/* Desktop Navigation */}
-        <div className="hidden md:flex gap-12 text-nav text-muted-foreground">
-          {navLinks.map((link) => (
-            <Link
-              key={link.path}
-              to={link.path}
-              className={`transition-colors duration-300 ${isActive(link.path)
-                ? 'text-primary'
-                : 'hover:text-primary'
-                }`}
-            >
-              {link.label}
-            </Link>
-          ))}
+        <div className="hidden md:flex items-center gap-8 text-nav text-muted-foreground">
+          {navLinks.map((link) => {
+            const isEvents = link.path === '/events';
+            const isJobs = link.path === '/jobs';
+            const active = isActive(link.path);
+
+            if (isEvents || isJobs) {
+              return (
+                <Link
+                  key={link.path}
+                  to={link.path}
+                  className={`flex items-center gap-1.5 px-4 py-1.5 rounded-full text-[13px] font-bold border transition-all duration-300 ${active
+                      ? 'bg-primary text-primary-foreground border-primary shadow-md shadow-primary/30'
+                      : 'border-primary/40 text-primary hover:bg-primary hover:text-primary-foreground hover:border-primary hover:shadow-md hover:shadow-primary/20'
+                    }`}
+                >
+                  {isEvents ? <Calendar size={13} /> : <Briefcase size={13} />}
+                  {link.label}
+                </Link>
+              );
+            }
+
+            return (
+              <Link
+                key={link.path}
+                to={link.path}
+                className={`transition-colors duration-300 ${active ? 'text-primary' : 'hover:text-primary'
+                  }`}
+              >
+                {link.label}
+              </Link>
+            );
+          })}
         </div>
 
         {/* Auth Buttons */}
@@ -119,19 +139,42 @@ const Navbar = () => {
       {isMobileMenuOpen && (
         <div className="md:hidden absolute top-full left-0 w-full glass-light border-t border-border/50 animate-fade-in">
           <div className="flex flex-col p-6 gap-4">
-            {navLinks.map((link) => (
-              <Link
-                key={link.path}
-                to={link.path}
-                onClick={() => setIsMobileMenuOpen(false)}
-                className={`text-nav py-2 transition-colors duration-300 ${isActive(link.path)
-                  ? 'text-primary'
-                  : 'text-muted-foreground hover:text-primary'
-                  }`}
-              >
-                {link.label}
-              </Link>
-            ))}
+            {navLinks.map((link) => {
+              const isEvents = link.path === '/events';
+              const isJobs = link.path === '/jobs';
+              const active = isActive(link.path);
+
+              if (isEvents || isJobs) {
+                return (
+                  <Link
+                    key={link.path}
+                    to={link.path}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-[13px] font-bold border transition-all duration-300 ${active
+                        ? 'bg-primary text-primary-foreground border-primary'
+                        : 'border-primary/40 text-primary'
+                      }`}
+                  >
+                    {isEvents ? <Calendar size={13} /> : <Briefcase size={13} />}
+                    {link.label}
+                  </Link>
+                );
+              }
+
+              return (
+                <Link
+                  key={link.path}
+                  to={link.path}
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className={`text-nav py-2 transition-colors duration-300 ${active
+                      ? 'text-primary'
+                      : 'text-muted-foreground hover:text-primary'
+                    }`}
+                >
+                  {link.label}
+                </Link>
+              );
+            })}
             <div className="border-t border-border/50 pt-4 mt-2">
               {!isAuthenticated ? (
                 <Link

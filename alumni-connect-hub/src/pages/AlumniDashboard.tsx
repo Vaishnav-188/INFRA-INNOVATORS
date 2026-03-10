@@ -24,6 +24,7 @@ const AlumniDashboard = () => {
   const [settings, setSettings] = useState<any>(null);
   const [myDonations, setMyDonations] = useState<any[]>([]);
   const [myPosts, setMyPosts] = useState<any[]>([]);
+  const [verifiedCandidates, setVerifiedCandidates] = useState<any[]>([]);
   const [isDataLoading, setIsDataLoading] = useState(true);
   const [transactionId, setTransactionId] = useState('');
   const [isSuccess, setIsSuccess] = useState(false);
@@ -94,6 +95,33 @@ const AlumniDashboard = () => {
       // Sort by date newest
       combined.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
       setMyPosts(combined);
+
+      // Fetch Verified Candidates (Screened applications where score > 0 or status is shortlisted/rejected)
+      const allJobsRes = await fetch('/api/jobs');
+      const allJobsData = await allJobsRes.json();
+      const myJobsList = allJobsData.success ? allJobsData.jobs.filter((j: any) => j.postedBy?._id === user?.id || j.postedBy === user?.id) : [];
+
+      const verifiedCandidates: any[] = [];
+      await Promise.all(myJobsList.map(async (job: any) => {
+        try {
+          const appRes = await fetch(`/api/resume/${job._id}/applications`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+          const appData = await appRes.json();
+          if (appData.success) {
+            appData.applications.filter((a: any) => a.screened || a.status !== 'pending').forEach((a: any) => {
+              verifiedCandidates.push({
+                ...a,
+                jobTitle: job.title
+              });
+            });
+          }
+        } catch (e) {
+          console.error(`Error fetching applications for job ${job._id}:`, e);
+        }
+      }));
+
+      setVerifiedCandidates(verifiedCandidates.sort((a, b) => new Date(b.updatedAt || b.createdAt).getTime() - new Date(a.updatedAt || a.createdAt).getTime()).slice(0, 5));
 
     } catch (err) {
       console.error('Error fetching dashboard data:', err);
@@ -266,7 +294,7 @@ const AlumniDashboard = () => {
             <p className="font-bold text-foreground">Donate</p>
             <p className="text-xs text-muted-foreground">Support your alma mater</p>
           </GlassCard>
-          <Link to="/mentorship">
+          <Link to="/connections">
             <GlassCard variant="light" className="p-6 text-center hover-lift cursor-pointer group">
               <div className="w-14 h-14 mx-auto rounded-2xl bg-destructive/10 flex items-center justify-center mb-3 group-hover:bg-destructive/20 transition">
                 <Users className="text-destructive" size={24} />
@@ -391,6 +419,57 @@ const AlumniDashboard = () => {
                 </p>
               </div>
             )}
+          </GlassCard>
+
+          {/* Verified by Me */}
+          <GlassCard variant="light" className="p-8">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-xl font-black text-foreground uppercase tracking-tight">Verified by Me</h2>
+              <Link to="/jobs" className="text-primary text-[10px] font-black uppercase tracking-widest flex items-center gap-1 hover:underline">
+                Manage All <ArrowRight size={14} />
+              </Link>
+            </div>
+            <div className="space-y-4">
+              {isDataLoading ? (
+                <div className="py-20 text-center animate-pulse">
+                  <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                  <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Loading candidates...</p>
+                </div>
+              ) : verifiedCandidates.map((candidate) => (
+                <div
+                  key={candidate._id}
+                  className="flex items-center gap-4 p-4 bg-muted/50 border border-border/50 rounded-2xl hover:bg-muted/80 transition-colors"
+                >
+                  <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center font-black text-primary">
+                    {candidate.student?.name?.charAt(0) || 'S'}
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="font-bold text-foreground text-sm truncate">{candidate.student?.name}</h3>
+                    <p className="text-[10px] text-primary font-black uppercase tracking-widest">{candidate.jobTitle}</p>
+                  </div>
+                  <div className="text-right">
+                    <div className={`text-[9px] font-black px-3 py-1 rounded-full uppercase ${candidate.status === 'shortlisted' ? 'bg-success/10 text-success' : 'bg-destructive/10 text-destructive'
+                      }`}>
+                      {candidate.status}
+                    </div>
+                    {candidate.aiScore && (
+                      <p className="text-[10px] font-black text-muted-foreground mt-1">{candidate.aiScore}% Match</p>
+                    )}
+                  </div>
+                </div>
+              ))}
+              {!isDataLoading && verifiedCandidates.length === 0 && (
+                <div className="text-center py-12 px-6">
+                  <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4 opacity-50">
+                    <Award className="text-muted-foreground" size={24} />
+                  </div>
+                  <p className="text-xs font-bold text-muted-foreground uppercase tracking-tight">No verifications yet</p>
+                  <Link to="/jobs" className="text-[10px] text-primary font-black uppercase tracking-widest mt-2 hover:underline">
+                    Go to Verification Center
+                  </Link>
+                </div>
+              )}
+            </div>
           </GlassCard>
         </div>
 

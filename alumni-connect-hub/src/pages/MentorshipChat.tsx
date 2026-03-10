@@ -1,26 +1,18 @@
 
 
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import MainLayout from '@/components/layout/MainLayout';
 import { useAuth } from '@/context/AuthContext';
 import { usePageTransition } from '@/hooks/useGSAP';
 import {
-    Send, ArrowLeft, Bot, User, CheckCircle,
+    ArrowLeft, CheckCircle,
     BookOpen, Sparkles, RotateCcw, ChevronRight,
-    MessageCircle, MapPin, Trophy
+    MapPin, Trophy, Lock, Mail
 } from 'lucide-react';
 import { toast } from 'sonner';
 
-// ── Types ─────────────────────────────────────────────────────────────────────
-interface ChatMsg {
-    _id: string;
-    sender: { _id: string; name: string; username: string; role: string };
-    receiver: { _id: string; name: string; username: string; role: string };
-    message: string;
-    read: boolean;
-    createdAt: string;
-}
+
 
 interface QuizQuestion {
     question: string;
@@ -157,14 +149,9 @@ const MentorshipChat = () => {
     const { user, isLoading: authLoading } = useAuth();
     const navigate = useNavigate();
     const pageRef = usePageTransition();
-    const messagesEndRef = useRef<HTMLDivElement>(null);
 
-    // ── Chat state ─────────────────────────────────────────────────────────
-    const [messages, setMessages] = useState<ChatMsg[]>([]);
-    const [newMessage, setNewMessage] = useState('');
+    // ── Page loading state ────────────────────────────────────────────────
     const [isLoading, setIsLoading] = useState(true);
-    const [isSending, setIsSending] = useState(false);
-    const [otherUser, setOtherUser] = useState<any>(null);
 
     // ── Left-panel tab: 'roadmap' | 'quiz' ────────────────────────────────
     const [leftTab, setLeftTab] = useState<'roadmap' | 'quiz'>('roadmap');
@@ -183,88 +170,53 @@ const MentorshipChat = () => {
     const [quizSubmitted, setQuizSubmitted] = useState(false);
     const [quizScore, setQuizScore] = useState(0);
 
-    // ── Unread message notification ───────────────────────────────────────
-    const [unreadCount, setUnreadCount] = useState(0);
-    const lastSeenCountRef = useRef(0);
+    // ── Chat unlock state (gated on email being sent) ─────────────────────
+    const [chatUnlocked, setChatUnlocked] = useState<boolean | null>(null);
 
-    // ── Scroll chat to bottom ─────────────────────────────────────────────
-    useEffect(() => {
-        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }, [messages]);
-
-    // ── Fetch chat messages + determine other user ─────────────────────────
-    const fetchChatData = async () => {
+    // ── Fetch chat unlock status ──────────────────────────────────────────
+    const fetchChatStatus = async () => {
         const token = localStorage.getItem('alumni_hub_token');
         if (!token || !mentorshipId) return;
-        setIsLoading(true);
         try {
             const res = await fetch(`/api/mentorship/chat/${mentorshipId}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             const data = await res.json();
-
-            let tempOther = null;
             if (data.success) {
-                setMessages(data.messages);
-                if (data.messages.length > 0) {
-                    const first = data.messages[0];
-                    tempOther = first.sender._id === user?.id ? first.receiver : first.sender;
-                    setOtherUser(tempOther);
-                }
+                setChatUnlocked(data.chatUnlocked ?? true);
             }
+        } catch {
+            setChatUnlocked(true); // fail-open in dev
+        }
+    };
 
-            // Fallback: fetch mentorship details for other user name
-            if (!tempOther) {
-                const mRes = await fetch('/api/mentorship/requests', { headers: { Authorization: `Bearer ${token}` } });
-                const mData = await mRes.json();
-                if (mData.success) {
-                    const m = mData.requests.find((r: any) => r._id === mentorshipId);
-                    if (m) {
-                        const other = user?.role === 'student' ? m.alumni : m.student;
-                        setOtherUser(other);
-                        // Auto-load roadmap if not loaded
-                        if (!roadmapState.loaded && !roadmapState.loading) {
-                            loadDomainRoadmap(m.domain);
-                        }
-                    }
+    // ── Fetch mentorship domain to auto-load roadmap ──────────────────────
+    const fetchMentorshipDomain = async () => {
+        const token = localStorage.getItem('alumni_hub_token');
+        if (!token || !mentorshipId) return;
+        setIsLoading(true);
+        try {
+            const mRes = await fetch('/api/mentorship/requests', { headers: { Authorization: `Bearer ${token}` } });
+            const mData = await mRes.json();
+            if (mData.success) {
+                const m = mData.requests.find((r: any) => r._id === mentorshipId);
+                if (m && !roadmapState.loaded && !roadmapState.loading) {
+                    loadDomainRoadmap(m.domain);
                 }
             }
-        } catch (e) {
-            toast.error('Error loading chat');
+        } catch {
+            toast.error('Error loading mentorship');
         } finally {
             setIsLoading(false);
         }
     };
 
-    // ── Poll silently every 5 s ─────────────────────────────────────────────
-    const pollMessages = async () => {
-        const token = localStorage.getItem('alumni_hub_token');
-        if (!token || !mentorshipId) return;
-        try {
-            const res = await fetch(`/api/mentorship/chat/${mentorshipId}`, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
-            const data = await res.json();
-            if (data.success) {
-                const incoming = data.messages as ChatMsg[];
-                setMessages(incoming);
-                // Count messages from the other person that we haven't seen yet
-                const newFromOther = incoming.filter(
-                    (m) => String(m.sender?._id || m.sender) !== String(user?.id)
-                ).length;
-                if (newFromOther > lastSeenCountRef.current) {
-                    setUnreadCount(newFromOther - lastSeenCountRef.current);
-                }
-            }
-        } catch { }
-    };
-
     useEffect(() => {
         if (user && mentorshipId) {
-            fetchChatData();
-            const iv = setInterval(pollMessages, 5000);
+            fetchMentorshipDomain();
+            fetchChatStatus();
             const to = setTimeout(() => setIsLoading(false), 10000);
-            return () => { clearInterval(iv); clearTimeout(to); };
+            return () => { clearTimeout(to); };
         }
     }, [user, mentorshipId]);
 
@@ -319,34 +271,6 @@ const MentorshipChat = () => {
         } catch (e: any) {
             setRoadmapState(s => ({ ...s, loading: false }));
             toast.error('Failed to generate roadmap: ' + (e.message || 'Server error'));
-        }
-    };
-
-    // ── Send chat message ─────────────────────────────────────────────────
-    const handleSendMessage = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!newMessage.trim() || isSending) return;
-        const token = localStorage.getItem('alumni_hub_token');
-        if (!token || !mentorshipId) return;
-
-        setIsSending(true);
-        try {
-            const res = await fetch(`/api/mentorship/chat/${mentorshipId}`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-                body: JSON.stringify({ message: newMessage.trim() })
-            });
-            const data = await res.json();
-            if (data.success) {
-                setMessages(prev => [...prev, data.chatMessage]);
-                setNewMessage('');
-            } else {
-                toast.error(data.message || 'Failed to send');
-            }
-        } catch {
-            toast.error('Failed to send message');
-        } finally {
-            setIsSending(false);
         }
     };
 
@@ -548,19 +472,30 @@ const MentorshipChat = () => {
                     <button onClick={() => navigate(-1)} className="p-2 hover:bg-muted rounded-xl transition-colors">
                         <ArrowLeft size={18} />
                     </button>
-                    {otherUser && (
-                        <div className="flex items-center gap-3 flex-1">
-                            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center text-primary-foreground font-black text-sm">
-                                {otherUser.name?.charAt(0) || <User size={18} />}
-                            </div>
-                            <div>
-                                <h2 className="text-base font-black text-foreground leading-tight">{otherUser.name}</h2>
-                                <p className="text-xs text-muted-foreground">
-                                    {otherUser.role === 'alumni' ? `Alumni • ${otherUser.currentCompany || 'Mentor'}` : 'Student'} • {domain && `${domain} Mentorship`}
-                                </p>
-                            </div>
+                    <div className="flex items-center gap-3 flex-1">
+                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center text-primary-foreground">
+                            <Sparkles size={18} />
+                        </div>
+                        <div>
+                            <h2 className="text-base font-black text-foreground leading-tight">AI Roadmap & Quiz</h2>
+                            <p className="text-xs text-muted-foreground">
+                                {domain ? `${domain} Mentorship` : 'Personalised 6-week learning plan'}
+                            </p>
+                        </div>
+                    </div>
+
+                    {/* Chat status chip */}
+                    {user?.role === 'student' && chatUnlocked !== null && (
+                        <div className={`hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border ${chatUnlocked
+                                ? 'bg-green-500/10 border-green-500/30 text-green-600 dark:text-green-400'
+                                : 'bg-amber-500/10 border-amber-500/30 text-amber-600 dark:text-amber-400'
+                            }`}>
+                            {chatUnlocked
+                                ? <><span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />Messaging Active</>
+                                : <><Lock size={10} />Chat Locked</>}
                         </div>
                     )}
+
                     {/* Regenerate button — students only */}
                     {user?.role === 'student' && (
                         <button
@@ -574,12 +509,33 @@ const MentorshipChat = () => {
                     )}
                 </div>
 
-                {/* ── Main Body: Left (Roadmap/Quiz) + Right (Chat) ─────────── */}
-                {/* Left panel only for students. Alumni get full-width chat.     */}
+                {/* ── Chat locked banner (students only, shown when email not yet sent) ── */}
+                {user?.role === 'student' && chatUnlocked === false && (
+                    <div className="flex items-start gap-3 px-5 py-3 bg-amber-500/8 border-b border-amber-500/25 flex-shrink-0">
+                        <div className="w-8 h-8 rounded-xl bg-amber-500/15 flex items-center justify-center flex-shrink-0 mt-0.5">
+                            <Lock size={15} className="text-amber-500" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                            <p className="text-sm font-bold text-amber-700 dark:text-amber-400 leading-tight">
+                                Messaging is not yet available
+                            </p>
+                            <p className="text-xs text-amber-600/80 dark:text-amber-500/70 mt-0.5 leading-relaxed">
+                                Your mentorship is <strong className="font-bold">accepted</strong> — once your mentor confirms and an email is dispatched to you, the chat will unlock automatically.
+                                You can still explore your AI roadmap and practice the quiz below.
+                            </p>
+                        </div>
+                        <div className="flex items-center gap-1 text-amber-500 flex-shrink-0 mt-1">
+                            <Mail size={13} />
+                            <span className="text-[10px] font-bold">Pending email</span>
+                        </div>
+                    </div>
+                )}
+
+                {/* ── Main Body: AI Roadmap + Quiz (full width) ─────────── */}
                 <div className="flex-1 flex overflow-hidden">
 
-                    {/* ════ LEFT PANEL — AI Roadmap + Quiz (students only) ════ */}
-                    {user?.role === 'student' && <div className="w-[420px] flex-shrink-0 border-r border-border/50 flex flex-col bg-muted/20">
+                    {/* ════ FULL-WIDTH PANEL — AI Roadmap + Quiz ════ */}
+                    {user?.role === 'student' && <div className="flex-1 flex flex-col bg-muted/20">
 
                         {/* Left tab switcher */}
                         <div className="flex border-b border-border/50 flex-shrink-0">
@@ -736,105 +692,24 @@ const MentorshipChat = () => {
                         </div>
                     </div>}
 
-                    {/* ════ RIGHT PANEL — Direct Chat ══════════════════════════ */}
-                    <div className="flex-1 flex flex-col min-w-0">
-                        {/* Chat header */}
-                        <div className="px-4 py-3 border-b border-border/50 bg-background/95 flex-shrink-0">
-                            <div className="flex items-center gap-2">
-                                <MessageCircle size={16} className="text-primary" />
-                                <span className="text-sm font-black">Chat with {otherUser?.name || (user?.role === 'alumni' ? 'Student' : 'your mentor')}</span>
-                                {/* Unread badge — clears when chat is visible */}
-                                {unreadCount > 0 && (
-                                    <span
-                                        onClick={() => { setUnreadCount(0); lastSeenCountRef.current = messages.filter(m => String(m.sender?._id || m.sender) !== String(user?.id)).length; }}
-                                        className="flex items-center justify-center w-5 h-5 rounded-full bg-red-500 text-white text-[10px] font-black animate-bounce cursor-pointer"
-                                        title="New messages — click to clear"
-                                    >
-                                        {unreadCount > 9 ? '9+' : unreadCount}
-                                    </span>
-                                )}
-                                <span className="text-xs text-muted-foreground ml-auto">
-                                    {user?.role === 'alumni' ? `${domain || 'Mentorship'} chat` : `Ask anything about ${domain}`}
-                                </span>
+                    {/* Alumni view: simple notice */}
+                    {user?.role !== 'student' && (
+                        <div className="flex-1 flex items-center justify-center text-center p-8">
+                            <div className="max-w-sm">
+                                <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
+                                    <Sparkles size={28} className="text-primary" />
+                                </div>
+                                <h3 className="font-black text-foreground text-lg mb-2">Mentorship Dashboard</h3>
+                                <p className="text-sm text-muted-foreground mb-4">
+                                    The AI Roadmap & Quiz are personalised for your student. Once the acceptance email is sent, their messaging chat will also unlock.
+                                </p>
+                                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-green-500/10 border border-green-500/20 text-green-600 dark:text-green-400 text-xs font-bold">
+                                    <CheckCircle size={13} />
+                                    Mentorship is active
+                                </div>
                             </div>
                         </div>
-
-                        {/* Messages */}
-                        <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3">
-                            {messages.length === 0 ? (
-                                <div className="flex flex-col items-center justify-center h-full text-center gap-3">
-                                    <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center opacity-40">
-                                        <Send className="text-muted-foreground" size={24} />
-                                    </div>
-                                    <div>
-                                        <h3 className="font-black text-foreground mb-1">No messages yet</h3>
-                                        <p className="text-xs text-muted-foreground">
-                                            Say hi to {otherUser?.name || 'your mentor'}!<br />
-                                            Ask questions about <strong>{domain}</strong>.
-                                        </p>
-                                    </div>
-                                </div>
-                            ) : (
-                                messages.map((msg) => {
-                                    const isMe = String(msg.sender?._id || msg.sender) === String(user?.id);
-                                    return (
-                                        <div key={msg._id} className={`flex ${isMe ? 'justify-end' : 'justify-start'} animate-fade-in`}>
-                                            {/* Avatar for other user */}
-                                            {!isMe && (
-                                                <div className="w-7 h-7 rounded-full bg-gradient-to-br from-primary to-primary/60 text-primary-foreground flex items-center justify-center text-xs font-black mr-2 flex-shrink-0 self-end mb-1">
-                                                    {(msg.sender as any)?.name?.charAt(0) || <User size={12} />}
-                                                </div>
-                                            )}
-                                            <div className={`max-w-[78%] flex flex-col gap-0.5 ${isMe ? 'items-end' : 'items-start'}`}>
-                                                <div className={`px-3.5 py-2.5 rounded-2xl text-sm font-medium whitespace-pre-wrap break-words ${isMe
-                                                    ? 'bg-primary text-primary-foreground rounded-br-sm'
-                                                    : 'bg-muted text-foreground rounded-bl-sm'
-                                                    }`}>
-                                                    {msg.message}
-                                                </div>
-                                                <p className="text-[10px] text-muted-foreground px-1">
-                                                    {new Date(msg.createdAt).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
-                                                </p>
-                                            </div>
-                                            {/* Avatar for me */}
-                                            {isMe && (
-                                                <div className="w-7 h-7 rounded-full bg-muted-foreground/20 flex items-center justify-center text-xs font-black ml-2 flex-shrink-0 self-end mb-1">
-                                                    {user?.name?.charAt(0) || <User size={12} />}
-                                                </div>
-                                            )}
-                                        </div>
-                                    );
-                                })
-                            )}
-                            <div ref={messagesEndRef} />
-                        </div>
-
-                        {/* Message input */}
-                        <div className="px-4 py-3 border-t border-border/50 bg-background/95 flex-shrink-0">
-                            <form onSubmit={handleSendMessage} className="flex items-center gap-2">
-                                <input
-                                    type="text"
-                                    value={newMessage}
-                                    onChange={(e) => setNewMessage(e.target.value)}
-                                    placeholder={`Ask ${otherUser?.name || 'your mentor'} about ${domain || 'anything'}...`}
-                                    disabled={isSending}
-                                    className="flex-1 h-11 px-4 bg-muted border-2 border-transparent rounded-xl text-sm outline-none focus:border-primary/30 transition-all placeholder:text-muted-foreground/50"
-                                />
-                                <button
-                                    type="submit"
-                                    disabled={!newMessage.trim() || isSending}
-                                    className="h-11 w-11 rounded-xl bg-primary text-primary-foreground flex items-center justify-center hover:bg-primary/90 transition-colors disabled:opacity-50"
-                                >
-                                    <Send size={18} />
-                                </button>
-                            </form>
-                            {user?.role === 'student' && (
-                                <p className="text-[10px] text-muted-foreground mt-1.5 text-center">
-                                    💡 Tip: Use the left panel to view your AI roadmap and take the skill quiz!
-                                </p>
-                            )}
-                        </div>
-                    </div>
+                    )}
                 </div>
             </div>
         </MainLayout>

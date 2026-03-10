@@ -180,94 +180,100 @@ const Events = () => {
                 <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
                 <p className="text-sm font-black text-muted-foreground uppercase tracking-widest">Gathering Events...</p>
               </div>
-            ) : events.map((event) => (
-              <div key={event._id} className="glass-card rounded-[3rem] border border-border relative overflow-hidden hover:border-primary/30 transition-all duration-500 shadow-xl hover:shadow-2xl hover:shadow-primary/5">
-                <div className="p-8 md:p-12">
-                  <div className="flex justify-between items-start mb-8">
-                    <div className="flex gap-6">
-                      <div className="w-16 h-16 rounded-2xl bg-muted border border-border flex items-center justify-center font-black text-2xl text-primary shadow-inner uppercase tracking-widest">
-                        {event.organizer?.name?.charAt(0) || 'U'}
+            ) : events
+              .map((event) => (
+                <div key={event._id} className="glass-card rounded-[3rem] border border-border relative overflow-hidden hover:border-primary/30 transition-all duration-500 shadow-xl hover:shadow-2xl hover:shadow-primary/5">
+                  <div className="p-8 md:p-12">
+                    <div className="flex justify-between items-start mb-8">
+                      <div className="flex gap-6">
+                        <div className="w-16 h-16 rounded-2xl bg-muted border border-border flex items-center justify-center font-black text-2xl text-primary shadow-inner uppercase tracking-widest">
+                          {event.organizer?.name?.charAt(0) || 'U'}
+                        </div>
+                        <div>
+                          <h3 className="font-black text-base text-foreground uppercase tracking-tight">{event.organizer?.name || 'Anonymous'}</h3>
+                          {event.organizer?.currentCompany && event.organizer?.currentCompany !== 'Not Placed' && (
+                            <p className="text-[10px] font-black text-primary uppercase tracking-widest mt-0.5">
+                              {event.organizer.currentCompany}
+                            </p>
+                          )}
+                          <p className="text-[10px] text-muted-foreground font-black uppercase tracking-[0.2em] flex items-center gap-2 mt-2">
+                            POSTED: {new Date(event.createdAt).toLocaleDateString()}
+                            {event.date && (
+                              <span className="text-primary bg-primary/10 px-3 py-0.5 rounded-full ml-2">
+                                EVENT DATE: {new Date(event.date).toLocaleDateString()}
+                              </span>
+                            )}
+                            {event.status === 'pending' && (
+                              <span className="text-warning bg-warning/10 px-3 py-0.5 rounded-full ml-2 border border-warning/20">
+                                WAITING FOR APPROVAL
+                              </span>
+                            )}
+                          </p>
+                        </div>
                       </div>
-                      <div>
-                        <h3 className="font-black text-base text-foreground uppercase tracking-tight">{event.organizer?.name || 'Anonymous'}</h3>
-                        <p className="text-[10px] text-muted-foreground font-black uppercase tracking-[0.2em] flex items-center gap-2 mt-1">
-                          POSTED: {new Date(event.createdAt).toLocaleDateString()}
-                          {event.date && (
-                            <span className="text-primary bg-primary/10 px-3 py-0.5 rounded-full ml-2">
-                              EVENT DATE: {new Date(event.date).toLocaleDateString()}
-                            </span>
-                          )}
-                          {event.status === 'pending' && (
-                            <span className="text-warning bg-warning/10 px-3 py-0.5 rounded-full ml-2 border border-warning/20">
-                              WAITING FOR APPROVAL
-                            </span>
-                          )}
-                        </p>
+
+                      <div className="relative">
+                        <button
+                          onClick={() => setOpenDropdown(openDropdown === event._id ? null : event._id)}
+                          className="p-3 hover:bg-muted rounded-2xl transition-colors"
+                        >
+                          <MoreHorizontal size={24} className="text-muted-foreground" />
+                        </button>
+
+                        {openDropdown === event._id && (
+                          <div className="absolute right-0 mt-3 w-56 bg-card border border-border rounded-2xl shadow-2xl z-50 py-3 animate-fade-in ring-1 ring-black/5">
+                            {(user?.role === 'admin' || (user?.role === 'alumni' && event.organizer?._id === user?.id)) && (
+                              <button
+                                onClick={() => handleEdit(event)}
+                                className="w-full text-left px-5 py-3 text-[10px] font-black uppercase tracking-widest text-foreground hover:bg-primary/10 hover:text-primary flex items-center gap-3 transition"
+                              >
+                                <Edit3 size={16} /> EDIT EVENT
+                              </button>
+                            )}
+                            {(user?.role === 'admin' || (user?.role === 'alumni' && event.organizer?._id === user?.id)) && (
+                              <button
+                                onClick={() => handleDelete(event._id)}
+                                className="w-full text-left px-5 py-3 text-[10px] font-black uppercase tracking-widest text-destructive hover:bg-destructive/10 flex items-center gap-3 transition"
+                              >
+                                <Trash2 size={16} /> DELETE EVENT
+                              </button>
+                            )}
+                            <button className="w-full text-left px-5 py-3 text-[10px] font-black uppercase tracking-widest text-foreground hover:bg-muted flex items-center gap-3 transition">
+                              <Bookmark size={16} /> SAVE EVENT
+                            </button>
+                          </div>
+                        )}
                       </div>
                     </div>
 
-                    <div className="relative">
-                      <button
-                        onClick={() => setOpenDropdown(openDropdown === event._id ? null : event._id)}
-                        className="p-3 hover:bg-muted rounded-2xl transition-colors"
-                      >
-                        <MoreHorizontal size={24} className="text-muted-foreground" />
-                      </button>
+                    <div className="mb-8">
+                      <h4 className="text-3xl font-black text-foreground mb-4 tracking-tighter leading-tight">{event.title}</h4>
+                      <p className="text-base text-foreground/70 leading-relaxed font-medium">{event.description}</p>
+                    </div>
 
-                      {openDropdown === event._id && (
-                        <div className="absolute right-0 mt-3 w-56 bg-card border border-border rounded-2xl shadow-2xl z-50 py-3 animate-fade-in ring-1 ring-black/5">
-                          {(user?.role === 'admin' || (user?.role === 'alumni' && event.organizer?._id === user?.id)) && (
-                            <button
-                              onClick={() => handleEdit(event)}
-                              className="w-full text-left px-5 py-3 text-[10px] font-black uppercase tracking-widest text-foreground hover:bg-primary/10 hover:text-primary flex items-center gap-3 transition"
-                            >
-                              <Edit3 size={16} /> EDIT EVENT
-                            </button>
-                          )}
-                          {(user?.role === 'admin' || (user?.role === 'alumni' && event.organizer?._id === user?.id)) && (
-                            <button
-                              onClick={() => handleDelete(event._id)}
-                              className="w-full text-left px-5 py-3 text-[10px] font-black uppercase tracking-widest text-destructive hover:bg-destructive/10 flex items-center gap-3 transition"
-                            >
-                              <Trash2 size={16} /> DELETE EVENT
-                            </button>
-                          )}
-                          <button className="w-full text-left px-5 py-3 text-[10px] font-black uppercase tracking-widest text-foreground hover:bg-muted flex items-center gap-3 transition">
-                            <Bookmark size={16} /> SAVE EVENT
-                          </button>
+                    <div className="flex flex-wrap gap-4 items-center">
+                      <div className="px-5 py-2 bg-primary/10 rounded-2xl text-[10px] font-black text-primary uppercase tracking-widest border border-primary/10 flex items-center gap-2">
+                        <Calendar size={14} /> {event.eventType || 'Networking'}
+                      </div>
+                      {event.venue && (
+                        <div className="px-5 py-2 bg-muted rounded-2xl text-[10px] font-black text-muted-foreground uppercase tracking-widest border border-border flex items-center gap-2">
+                          <MapPin size={14} /> {event.venue}
                         </div>
                       )}
                     </div>
                   </div>
 
-                  <div className="mb-8">
-                    <h4 className="text-3xl font-black text-foreground mb-4 tracking-tighter leading-tight">{event.title}</h4>
-                    <p className="text-base text-foreground/70 leading-relaxed font-medium">{event.description}</p>
-                  </div>
-
-                  <div className="flex flex-wrap gap-4 items-center">
-                    <div className="px-5 py-2 bg-primary/10 rounded-2xl text-[10px] font-black text-primary uppercase tracking-widest border border-primary/10 flex items-center gap-2">
-                      <Calendar size={14} /> {event.eventType || 'Networking'}
+                  {event.imageUrl && (
+                    <div className="border-t border-border bg-muted/30">
+                      <img
+                        src={event.imageUrl}
+                        alt="Event Banner"
+                        className="w-full h-auto max-h-[600px] object-cover hover:scale-[1.01] transition-transform duration-700"
+                      />
                     </div>
-                    {event.venue && (
-                      <div className="px-5 py-2 bg-muted rounded-2xl text-[10px] font-black text-muted-foreground uppercase tracking-widest border border-border flex items-center gap-2">
-                        <MapPin size={14} /> {event.venue}
-                      </div>
-                    )}
-                  </div>
+                  )}
                 </div>
-
-                {event.imageUrl && (
-                  <div className="border-t border-border bg-muted/30">
-                    <img
-                      src={event.imageUrl}
-                      alt="Event Banner"
-                      className="w-full h-auto max-h-[600px] object-cover hover:scale-[1.01] transition-transform duration-700"
-                    />
-                  </div>
-                )}
-              </div>
-            ))}
+              ))}
 
             {!loading && events.length === 0 && (
               <div className="text-center py-32 bg-muted/10 rounded-[3rem] border border-dashed border-border">

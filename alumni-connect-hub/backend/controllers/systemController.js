@@ -72,7 +72,7 @@ export const uploadQrCode = async (req, res) => {
             return res.status(400).json({ success: false, message: 'Please upload an image' });
         }
 
-        const qrCodeUrl = `http://localhost:5000/uploads/images/${req.file.filename}`;
+        const qrCodeUrl = `/uploads/images/${req.file.filename}`;
 
         let settings = await SystemConfig.findOne();
         if (!settings) {
@@ -103,7 +103,7 @@ export const uploadImage = async (req, res) => {
             return res.status(400).json({ success: false, message: 'Please upload an image' });
         }
 
-        const imageUrl = `http://localhost:5000/uploads/images/${req.file.filename}`;
+        const imageUrl = `/uploads/images/${req.file.filename}`;
 
         res.json({
             success: true,

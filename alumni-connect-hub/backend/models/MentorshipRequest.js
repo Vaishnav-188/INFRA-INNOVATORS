@@ -50,6 +50,14 @@ const mentorshipRequestSchema = new mongoose.Schema({
         type: Boolean,
         default: false
     },
+    // Flag set to true once the acceptance email is sent to the student
+    emailSentToStudent: {
+        type: Boolean,
+        default: false
+    },
+    emailSentAt: {
+        type: Date
+    },
     approvedBy: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User'

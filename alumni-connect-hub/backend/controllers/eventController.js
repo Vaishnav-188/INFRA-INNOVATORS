@@ -6,7 +6,7 @@ import Event from '../models/Event.js';
 export const getAllEvents = async (req, res) => {
     try {
         const events = await Event.find({ status: { $ne: 'pending' } })
-            .populate('organizer', 'name email')
+            .populate('organizer', 'name email role currentCompany')
             .sort({ date: 1 });
 
         res.json({
@@ -26,6 +26,7 @@ export const getAllEvents = async (req, res) => {
 export const getMyEvents = async (req, res) => {
     try {
         const events = await Event.find({ organizer: req.user._id })
+            .populate('organizer', 'name email role currentCompany')
             .sort({ createdAt: -1 });
 
         res.json({
@@ -54,7 +55,7 @@ export const createEvent = async (req, res) => {
             isVirtual: isVirtual === 'true' || isVirtual === true,
             meetingLink,
             organizer: req.user._id,
-            status: req.user.role === 'admin' ? 'upcoming' : 'pending'
+            status: (req.user.role === 'admin' || req.user.role === 'alumni') ? 'upcoming' : 'pending'
         });
 
         res.status(201).json({

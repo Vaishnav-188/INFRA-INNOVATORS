@@ -11,12 +11,12 @@ import authRoutes from './routes/authRoutes.js';
 import jobRoutes from './routes/jobRoutes.js';
 import csvRoutes from './routes/csvRoutes.js';
 import connectionRoutes from './routes/connectionRoutes.js';
-import chatRoutes from './routes/chatRoutes.js';
 import userRoutes from './routes/userRoutes.js';
 import systemRoutes from './routes/systemRoutes.js';
 import donationRoutes from './routes/donationRoutes.js';
 import eventRoutes from './routes/eventRoutes.js';
 import mentorshipRoutes from './routes/mentorshipRoutes.js';
+import resumeRoutes from './routes/resumeRoutes.js';
 
 // Load environment variables
 dotenv.config();
@@ -55,12 +55,12 @@ app.use('/api/auth', authRoutes);
 app.use('/api/jobs', jobRoutes);
 app.use('/api/csv', csvRoutes);
 app.use('/api/connections', connectionRoutes);
-app.use('/api/chat', chatRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/system', systemRoutes);
 app.use('/api/donations', donationRoutes);
 app.use('/api/events', eventRoutes);
 app.use('/api/mentorship', mentorshipRoutes);
+app.use('/api/resume', resumeRoutes);
 
 // Health check route
 app.get('/health', (req, res) => {
@@ -81,8 +81,7 @@ app.get('/', (req, res) => {
             auth: '/api/auth',
             jobs: '/api/jobs',
             csv: '/api/csv',
-            connections: '/api/connections',
-            chat: '/api/chat'
+            connections: '/api/connections'
         }
     });
 });
@@ -124,7 +123,6 @@ app.listen(PORT, () => {
 ║        → Jobs:  http://localhost:${PORT}/api/jobs          ║
 ║        → CSV:   http://localhost:${PORT}/api/csv           ║
 ║        → Connect: http://localhost:${PORT}/api/connections ║
-║        → Chat:  http://localhost:${PORT}/api/chat          ║
 ║                                                           ║
 ╚═══════════════════════════════════════════════════════════╝
   `);
