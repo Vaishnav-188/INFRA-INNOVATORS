@@ -9,11 +9,9 @@ async function checkApps() {
     try {
         await mongoose.connect(MONGODB_URI);
         console.log('Connected to MongoDB');
-
         const apps = await ResumeApplication.find()
             .populate('student', 'name username collegeEmail')
             .populate('job', 'title postedBy');
-
         console.log('Total Applications:', apps.length);
 
         const jobs = await Job.find().populate('postedBy', 'name');

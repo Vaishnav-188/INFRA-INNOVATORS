@@ -21,7 +21,7 @@ const createTransporter = () => {
  * Sends a mentorship acceptance email to the student.
  * Returns true if sent, false otherwise.
  */
-const sendMentorshipAcceptanceEmail = async (studentEmail, studentName, alumniName, domain, mentorshipId) => {
+const sendMentorshipAcceptanceEmail = async (studentEmail, studentName, alumniName, alumniEmail, domain, mentorshipId) => {
     const transporter = createTransporter();
     if (!transporter) {
         console.warn('[EMAIL] Transporter not configured — skipping email send');
@@ -86,9 +86,10 @@ const sendMentorshipAcceptanceEmail = async (studentEmail, studentName, alumniNa
 
     try {
         await transporter.sendMail({
-            from: `"AlumniHub 🎓" <${process.env.EMAIL_USER}>`,
+            from: `"${alumniName} via AlumniHub" <${process.env.EMAIL_USER}>`,
+            replyTo: alumniEmail ? `"${alumniName}" <${alumniEmail}>` : process.env.EMAIL_USER,
             to: studentEmail,
-            subject: `🎉 Mentorship Accepted by ${alumniName} — Your Chat is Now Open!`,
+            subject: `${alumniName} accepted your mentorship request on AlumniHub!`,
             html: htmlBody
         });
         console.log(`[EMAIL] Acceptance email sent to ${studentEmail}`);
@@ -317,8 +318,8 @@ export const updateMentorshipRequest = async (req, res) => {
                 // Email the student (themselves) to confirm
                 shouldSendEmail = true;
                 emailStudentId = req.user._id;
-                // Fetch the alumni for name
-                emailAlumniUser = await User.findById(request.alumni).select('name').lean();
+                // Fetch the alumni for name + email
+                emailAlumniUser = await User.findById(request.alumni).select('name collegeEmail').lean();
             } else {
                 request.status = status;
             }
@@ -338,10 +339,12 @@ export const updateMentorshipRequest = async (req, res) => {
             if (student) {
                 const recipientEmail = student.collegeEmail;
                 const alumniName = emailAlumniUser.name || 'Your Mentor';
+                const alumniEmail = emailAlumniUser.collegeEmail || null;
                 const emailSent = await sendMentorshipAcceptanceEmail(
                     recipientEmail,
                     student.name,
                     alumniName,
+                    alumniEmail,
                     request.domain,
                     request._id.toString()
                 );
